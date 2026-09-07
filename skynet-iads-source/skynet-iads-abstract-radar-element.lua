@@ -61,7 +61,10 @@ function SkynetIADSAbstractRadarElement:weaponFired(event)
 		local launcherFired = event.initiator
 		for i = 1, #self.launchers do
 			local launcher = self.launchers[i]
-			if launcher:getDCSRepresentation() == launcherFired then
+			local launcherObject = launcher:getDCSRepresentation()
+			-- Match the engine object even if DCS supplies a fresh Lua wrapper.
+			if launcherObject and launcherFired and (launcherObject == launcherFired or
+				(launcherObject.id_ ~= nil and launcherObject.id_ == launcherFired.id_)) then
 				launcher:invalidateAmmoSnapshot()
 				table.insert(self.missilesInFlight, weapon)
 			end
