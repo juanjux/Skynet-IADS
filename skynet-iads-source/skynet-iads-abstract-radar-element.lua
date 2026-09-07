@@ -691,20 +691,12 @@ function SkynetIADSAbstractRadarElement:jam(successProbability)
 		end
 end
 
---- Watch for inbound HARMs, if there is any point.
---
--- The scan runs every two seconds for as long as the element is live, and walks every
--- contact against every radar, so it is the most expensive thing an element does. Two
--- kinds of element can never act on what it finds, and used to run it anyway:
---
---  * a point defence, which is excluded from going silent by informOfHARM; and
---  * anything whose HARM detection chance is zero, which is Skynet's default -- it can
---    never roll high enough to react.
+--- Start periodic element maintenance (historical public name retained).
+-- HARM identification runs in SkynetIADSHARMDetection, not in this timer.
+-- Disabling this task leaves expired missiles/HARMs and stale jamming state.
 function SkynetIADSAbstractRadarElement:scanForHarms()
 	self:stopScanningForHARMs()
-	if self:getIsAPointDefence() or self:getHARMDetectionChance() <= 0 then
-		return
-	end
+	-- All live elements need missile cleanup, HARM expiry and jammer recovery.
 	self.harmScanID = mist.scheduleFunction(SkynetIADSAbstractRadarElement.evaluateIfTargetsContainHARMs, {self}, 1, 2)
 end
 
@@ -830,29 +822,37 @@ end
 
 function SkynetIADSAbstractRadarElement:informOfHARM(harmContact)
 	local radars = self:getRadars()
-		for j = 1, #radars do
-			local radar = radars[j]
-			if radar:isExist() then
-				local distanceNM =  mist.utils.metersToNM(self:getDistanceInMetersToContact(radar, harmContact:getPosition().p))
-				local harmToSAMHeading = mist.utils.toDegree(mist.utils.getHeadingPoints(harmContact:getPosition().p, radar:getPosition().p))
-				local harmToSAMAspect = self:calculateAspectInDegrees(harmContact:getMagneticHeading(), harmToSAMHeading)
-				local speedKT = harmContact:getGroundSpeedInKnots(0)
-				local secondsToImpact = self:getSecondsToImpact(distanceNM, speedKT)
-				--TODO: use tti instead of distanceNM?
-				-- when iterating through the radars, store shortest tti and work with that value??
-				if ( harmToSAMAspect < SkynetIADSAbstractRadarElement.HARM_TO_SAM_ASPECT and distanceNM < SkynetIADSAbstractRadarElement.HARM_LOOKAHEAD_NM ) then
-					self:addObjectIdentifiedAsHARM(harmContact)
-					if ( #self:getPointDefences() > 0 and self:pointDefencesGoLive() == true and self.iads:getDebugSettings().harmDefence ) then
-							self.iads:printOutputToLog("POINT DEFENCES GOING LIVE FOR: "..self:getDCSName().." | TTI: "..secondsToImpact)
+	local contactPosition = harmContact:getPosition().p
+	local heading, speedKT
+	for j = 1, #radars do
+		local radar = radars[j]
+		if radar:isExist() then
+			local radarPosition = radar:getPosition().p
+			-- Preserve the existing metre rounding and strict NM boundary.
+			local distanceNM = mist.utils.metersToNM(mist.utils.round(mist.utils.get3DDist(radarPosition, contactPosition)))
+			if distanceNM < SkynetIADSAbstractRadarElement.HARM_LOOKAHEAD_NM then
+				local harmToSAMHeading = mist.utils.toDegree(mist.utils.getHeadingPoints(contactPosition, radarPosition))
+				if heading == nil then
+					heading = harmContact:getMagneticHeading()
+				end
+				local aspect = self:calculateAspectInDegrees(heading, harmToSAMHeading)
+				if aspect < SkynetIADSAbstractRadarElement.HARM_TO_SAM_ASPECT then
+					if speedKT == nil then
+						speedKT = harmContact:getGroundSpeedInKnots(0)
 					end
-					--self.iads:printOutputToLog("Ignore HARM shutdown: "..tostring(self:shallIgnoreHARMShutdown()))
-					if ( self:getIsAPointDefence() == false and ( self:isDefendingHARM() == false or ( self:getHARMShutdownTime() < secondsToImpact ) ) and self:shallIgnoreHARMShutdown() == false) then
+					local secondsToImpact = self:getSecondsToImpact(distanceNM, speedKT)
+					self:addObjectIdentifiedAsHARM(harmContact)
+					if #self:getPointDefences() > 0 and self:pointDefencesGoLive() == true and self.iads:getDebugSettings().harmDefence then
+						self.iads:printOutputToLog("POINT DEFENCES GOING LIVE FOR: "..self:getDCSName().." | TTI: "..secondsToImpact)
+					end
+					if self:getIsAPointDefence() == false and (self:isDefendingHARM() == false or self:getHARMShutdownTime() < secondsToImpact) and self:shallIgnoreHARMShutdown() == false then
 						self:goSilentToEvadeHARM(secondsToImpact)
 						break
 					end
 				end
 			end
 		end
+	end
 end
 
 function SkynetIADSAbstractElement:addObjectIdentifiedAsHARM(harmContact)

@@ -15,6 +15,9 @@ function SkynetIADS:create(name)
 	iads.ewRadarScanMistTaskID = nil
 	iads.coalition = nil
 	iads.contacts = {}
+	iads.contactsByName = {}
+	iads.indexedContacts = iads.contacts
+	iads.indexedContactCount = 0
 	iads.maxTargetAge = 32
 	iads.name = name
 	iads.harmDetection = SkynetIADSHARMDetection:create(iads)
@@ -403,13 +406,18 @@ end
 
 function SkynetIADS:cleanAgedTargets()
 	local contactsToKeep = {}
+	local byName = {}
 	for i = 1, #self.contacts do
 		local contact = self.contacts[i]
 		if contact:getAge() < self.maxTargetAge then
 			table.insert(contactsToKeep, contact)
+			byName[contact:getName()] = contact
 		end
 	end
 	self.contacts = contactsToKeep
+	self.contactsByName = byName
+	self.indexedContacts = contactsToKeep
+	self.indexedContactCount = #contactsToKeep
 end
 
 --TODO unit test this method:
@@ -531,23 +539,30 @@ function SkynetIADS:buildRadarCoverageForEarlyWarningRadar(ewRadar)
 end
 
 function SkynetIADS:mergeContact(contact)
-	local existingContact = false
-	for i = 1, #self.contacts do
-		local iadsContact = self.contacts[i]
-		if iadsContact:getName() == contact:getName() then
-			iadsContact:refresh()
-			--these contacts are used in the logger we set a kown harm state of a contact coming from a SAM site. So the logger will show them als HARMs
-			contact:setHARMState(iadsContact:getHARMState())
-			local radars = contact:getAbstractRadarElementsDetected()
-			for j = 1, #radars do
-				local radar = radars[j]
-				iadsContact:addAbstractRadarElementDetected(radar)
-			end
-			existingContact = true
+	-- Keep the ordered public array; rebuild if a caller replaced/resized it.
+	if self.indexedContacts ~= self.contacts or self.indexedContactCount ~= #self.contacts then
+		self.contactsByName = {}
+		for i = 1, #self.contacts do
+			local known = self.contacts[i]
+			self.contactsByName[known:getName()] = known
 		end
+		self.indexedContacts = self.contacts
+		self.indexedContactCount = #self.contacts
 	end
-	if existingContact == false then
+	local name = contact:getName()
+	local existing = self.contactsByName[name]
+	if existing then
+		existing:refresh()
+		-- The logger also uses the incoming per-radar contact.
+		contact:setHARMState(existing:getHARMState())
+		local radars = contact:getAbstractRadarElementsDetected()
+		for i = 1, #radars do
+			existing:addAbstractRadarElementDetected(radars[i])
+		end
+	else
 		table.insert(self.contacts, contact)
+		self.contactsByName[name] = contact
+		self.indexedContactCount = #self.contacts
 	end
 end
 
