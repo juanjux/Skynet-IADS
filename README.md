@@ -45,6 +45,16 @@ way:
 
 ### Performance and correctness (2026-09-07)
 
+- **Reject distant HARM tracks before heading calculations.** Each radar position is
+  sampled once. Tracks outside the existing rounded 20 NM boundary skip bearing/heading
+  work; heading and speed are read lazily at most once per notification. Existing
+  magnetic-heading conventions, rounding, strict aspect/distance limits and shutdown
+  rules are retained.
+  For 100 distant radars the test performs 100 instead of 200 radar-position reads and
+  zero instead of 100 bearing/heading calculations. No persistent position or heading
+  cache is introduced.
+  Verified with the offline Lua 5.1 harness (DCS/MIST doubles, not an FPS benchmark).
+
 - **Index contact merging and radar membership.** An auxiliary name index replaces the
   full contact-list scan; the ordered contact array and HARM history remain intact.
   Expiry rebuilds the index, while detecting-radar membership uses a set and HARM
