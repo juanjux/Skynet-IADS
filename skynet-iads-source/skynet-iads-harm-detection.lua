@@ -77,11 +77,17 @@ function SkynetIADSHARMDetection:getNewRadarsThatHaveDetectedContact(contact)
 		evaluatedRadars = {}
 		self.contactRadarsEvaluated[contact] = evaluatedRadars
 	end
+	-- A temporary set preserves the existing array's ownership and expiry rules.
+	local evaluated = {}
+	for i = 1, #evaluatedRadars do
+		evaluated[evaluatedRadars[i]] = true
+	end
 	for i = 1, #radarsFromContact do
-		local contactRadar = radarsFromContact[i]
-		if self:isElementInTable(evaluatedRadars, contactRadar) == false then
-			table.insert(evaluatedRadars, contactRadar)
-			table.insert(newRadars, contactRadar)
+		local radar = radarsFromContact[i]
+		if not evaluated[radar] then
+			evaluated[radar] = true
+			table.insert(evaluatedRadars, radar)
+			table.insert(newRadars, radar)
 		end
 	end
 	return newRadars

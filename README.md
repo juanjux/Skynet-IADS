@@ -45,6 +45,16 @@ way:
 
 ### Performance and correctness (2026-09-07)
 
+- **Index contact merging and radar membership.** An auxiliary name index replaces the
+  full contact-list scan; the ordered contact array and HARM history remain intact.
+  Expiry rebuilds the index, while detecting-radar membership uses a set and HARM
+  evaluation uses a temporary membership set without aliasing the contact's array.
+  The deterministic 50-radar / 200-contact test reduces getName calls from 3,959,800 to
+  10,000, including initial insertion. Replacing/resizing the contacts array rebuilds
+  its index; callers must not replace individual entries in-place or mutate the
+  detecting-radar array behind its add method.
+  Verified with the offline Lua 5.1 harness (DCS/MIST doubles, not an FPS benchmark).
+
 - **Continue HARM evaluation after a first sighting.** A contact with zero measured
   speed now skips only its own HARM classification, not the rest of the network scan.
   Classification probabilities, altitude-profile rules and notifications for later
