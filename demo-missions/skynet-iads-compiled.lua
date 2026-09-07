@@ -1,4 +1,4 @@
-env.info("--- SKYNET VERSION: 3.3.0-juanjux-fork | BUILD TIME: 07.09.2026 1550Z ---")
+env.info("--- SKYNET VERSION: 3.3.0-juanjux-harm-geometry | BUILD TIME: 07.09.2026 1634Z ---")
 do
 --this file contains the required units per sam type
 samTypesDB = {	
@@ -3234,29 +3234,37 @@ end
 
 function SkynetIADSAbstractRadarElement:informOfHARM(harmContact)
 	local radars = self:getRadars()
-		for j = 1, #radars do
-			local radar = radars[j]
-			if radar:isExist() then
-				local distanceNM =  mist.utils.metersToNM(self:getDistanceInMetersToContact(radar, harmContact:getPosition().p))
-				local harmToSAMHeading = mist.utils.toDegree(mist.utils.getHeadingPoints(harmContact:getPosition().p, radar:getPosition().p))
-				local harmToSAMAspect = self:calculateAspectInDegrees(harmContact:getMagneticHeading(), harmToSAMHeading)
-				local speedKT = harmContact:getGroundSpeedInKnots(0)
-				local secondsToImpact = self:getSecondsToImpact(distanceNM, speedKT)
-				--TODO: use tti instead of distanceNM?
-				-- when iterating through the radars, store shortest tti and work with that value??
-				if ( harmToSAMAspect < SkynetIADSAbstractRadarElement.HARM_TO_SAM_ASPECT and distanceNM < SkynetIADSAbstractRadarElement.HARM_LOOKAHEAD_NM ) then
-					self:addObjectIdentifiedAsHARM(harmContact)
-					if ( #self:getPointDefences() > 0 and self:pointDefencesGoLive() == true and self.iads:getDebugSettings().harmDefence ) then
-							self.iads:printOutputToLog("POINT DEFENCES GOING LIVE FOR: "..self:getDCSName().." | TTI: "..secondsToImpact)
+	local contactPosition = harmContact:getPosition().p
+	local heading, speedKT
+	for j = 1, #radars do
+		local radar = radars[j]
+		if radar:isExist() then
+			local radarPosition = radar:getPosition().p
+			-- Preserve the existing metre rounding and strict NM boundary.
+			local distanceNM = mist.utils.metersToNM(mist.utils.round(mist.utils.get3DDist(radarPosition, contactPosition)))
+			if distanceNM < SkynetIADSAbstractRadarElement.HARM_LOOKAHEAD_NM then
+				local harmToSAMHeading = mist.utils.toDegree(mist.utils.getHeadingPoints(contactPosition, radarPosition))
+				if heading == nil then
+					heading = harmContact:getMagneticHeading()
+				end
+				local aspect = self:calculateAspectInDegrees(heading, harmToSAMHeading)
+				if aspect < SkynetIADSAbstractRadarElement.HARM_TO_SAM_ASPECT then
+					if speedKT == nil then
+						speedKT = harmContact:getGroundSpeedInKnots(0)
 					end
-					--self.iads:printOutputToLog("Ignore HARM shutdown: "..tostring(self:shallIgnoreHARMShutdown()))
-					if ( self:getIsAPointDefence() == false and ( self:isDefendingHARM() == false or ( self:getHARMShutdownTime() < secondsToImpact ) ) and self:shallIgnoreHARMShutdown() == false) then
+					local secondsToImpact = self:getSecondsToImpact(distanceNM, speedKT)
+					self:addObjectIdentifiedAsHARM(harmContact)
+					if #self:getPointDefences() > 0 and self:pointDefencesGoLive() == true and self.iads:getDebugSettings().harmDefence then
+						self.iads:printOutputToLog("POINT DEFENCES GOING LIVE FOR: "..self:getDCSName().." | TTI: "..secondsToImpact)
+					end
+					if self:getIsAPointDefence() == false and (self:isDefendingHARM() == false or self:getHARMShutdownTime() < secondsToImpact) and self:shallIgnoreHARMShutdown() == false then
 						self:goSilentToEvadeHARM(secondsToImpact)
 						break
 					end
 				end
 			end
 		end
+	end
 end
 
 function SkynetIADSAbstractElement:addObjectIdentifiedAsHARM(harmContact)
