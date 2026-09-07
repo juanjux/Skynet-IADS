@@ -1,4 +1,4 @@
-env.info("--- SKYNET VERSION: 3.3.0-juanjux-contact-index | BUILD TIME: 07.09.2026 1634Z ---")
+env.info("--- SKYNET VERSION: 3.3.0-juanjux-fork | BUILD TIME: 07.09.2026 1702Z ---")
 do
 --this file contains the required units per sam type
 samTypesDB = {	
@@ -1024,11 +1024,801 @@ samTypesDB['Pantsir-SM'] = {
 
 --]]
 end
+do
+-- this file contains the definitions for the CurrentHill Russian Military Asset Pack: https://www.currenthill.com/russia
+
+samTypesDB['2S38'] = {
+	['type'] = 'single',
+	['searchRadar'] = {
+		['CH_2S38'] = {
+		},
+	},
+	['launchers'] = {
+		['CH_2S38'] = {
+		},
+	},
+	['name'] = {
+		['NATO'] = '2S38',
+	},
+	['harm_detection_chance'] = 5,
+	['can_engage_harm'] = true
+	
+}
+
+samTypesDB['2S38_LG'] = {
+	['type'] = 'single',
+	['searchRadar'] = {
+		['CH_2S38_LG'] = {
+		},
+	},
+	['launchers'] = {
+		['CH_2S38_LG'] = {
+		},
+	},
+	['name'] = {
+		['NATO'] = '2S38',
+	},
+	['harm_detection_chance'] = 5,
+	['can_engage_harm'] = true
+	
+}
+
+samTypesDB['Pantsir-S1'] = {
+	['type'] = 'single',
+	['searchRadar'] = {
+		['PantsirS1'] = {
+		},
+	},
+	['launchers'] = {
+		['PantsirS1'] = {
+		},
+	},
+	['name'] = {
+		['NATO'] = 'SA-22 Greyhound',
+	},
+	['harm_detection_chance'] = 75,
+	['can_engage_harm'] = true
+	
+}
+
+samTypesDB['Pantsir-S2'] = {
+	['type'] = 'single',
+	['searchRadar'] = {
+		['CH_PantsirS2'] = {
+		},
+	},
+	['launchers'] = {
+		['CH_PantsirS2'] = {
+		},
+	},
+	['name'] = {
+		['NATO'] = 'SA-22 Greyhound',
+	},
+	['harm_detection_chance'] = 75,
+	['can_engage_harm'] = true
+	
+}
+
+samTypesDB['Tor-M2'] = {
+	['type'] = 'single',
+	['searchRadar'] = {
+		['TorM2'] = {
+		},
+	},
+	['launchers'] = {
+		['TorM2'] = {
+		},
+	},
+	['name'] = {
+		['NATO'] = 'SA-15C "Gauntlet',
+	},
+	['harm_detection_chance'] = 80,
+	['can_engage_harm'] = true
+	
+}
+
+samTypesDB['Tor-M2K'] = {
+	['type'] = 'single',
+	['searchRadar'] = {
+		['CH_TorM2K'] = {
+		},
+	},
+	['launchers'] = {
+		['CH_TorM2K'] = {
+		},
+	},
+	['name'] = {
+		['NATO'] = 'SA-15D "Gauntlet',
+	},
+	['harm_detection_chance'] = 80,
+	['can_engage_harm'] = true
+	
+}
+
+samTypesDB['Tor-M2M'] = {
+	['type'] = 'single',
+	['searchRadar'] = {
+		['TorM2M'] = {
+		},
+	},
+	['launchers'] = {
+		['TorM2M'] = {
+		},
+	},
+	['name'] = {
+		['NATO'] = 'SA-15E "Gauntlet',
+	},
+	['harm_detection_chance'] = 85,
+	['can_engage_harm'] = true
+	
+}
+
+samTypesDB['S-350'] = {
+	['type'] = 'complex',
+	['searchRadar'] = {
+		['CH_S350_96L6'] = {
+			['name'] = {
+				['NATO'] = '',
+			},
+		},
+		['CH_S350_50N6'] = {
+			['name'] = {
+				['NATO'] = '',
+			},
+		},
+	},
+	['misc'] = {
+		['CH_S350_50K6'] = {
+			['required'] = true,
+		},
+	},
+	['launchers'] = {
+		['CH_S350_50P6_9M96D'] = {
+		},
+		['CH_S350_50P6_9M100'] = {
+		},
+	},
+	['name']  = {
+		['NATO'] = 'SA-27 Sizzler'
+	},
+	['harm_detection_chance'] = 95,
+	['can_engage_harm'] = true
+}	
+
+samTypesDB['Buk-M3'] = {
+	['type'] = 'complex',
+	['searchRadar'] = {
+		['CH_BukM3_9S18M13'] = {
+			['name'] = {
+				['NATO'] = 'Snow Drift',
+			},
+		},
+	},
+	['trackingRadar'] = {
+		['CH_BukM3_9S36M'] = {
+		},
+	},
+	['misc'] = {
+		['CH_BukM3_9S510M'] = {
+			['required'] = true,
+		},
+	},
+	['launchers'] = {
+		['CH_BukM3_9A317M'] = {
+		},
+		['CH_BukM3_9A317MA'] = {
+		},
+	},
+	['name']  = {
+		['NATO'] = 'SA-27 Gollum'
+	},
+	['harm_detection_chance'] = 92,
+	['can_engage_harm'] = true
+}	
+
+--[[
+
+--]]
+
+end
 
 
 
 do
+-- this file contains the definitions for the CurrentHill Russian Military Asset Pack: https://www.currenthill.com/russia
 
+samTypesDB['Centurion_C_RAM'] = {
+	['type'] = 'single',
+	['searchRadar'] = {
+		['CH_Centurion_C_RAM'] = {
+		},
+	},
+	['launchers'] = {
+		['CH_Centurion_C_RAM'] = {
+		},
+	},
+	['name'] = {
+		['NATO'] = 'Centurion',
+	},
+	['harm_detection_chance'] = 38,
+	['can_engage_harm'] = true
+	
+}
+
+samTypesDB['LAV_AD'] = {
+	['type'] = 'single',
+	['launchers'] = {
+		['CH_LAVAD'] = {
+		},
+	},
+	['name'] = {
+		['NATO'] = 'LAV-AD',
+	},
+	['harm_detection_chance'] = 5,
+	['can_engage_harm'] = true
+	
+}
+
+samTypesDB['MIM-104_US'] = {
+	['type'] = 'complex',
+	['searchRadar'] = {
+		['CH_MIM104_ANMPQ65'] = {
+			['name'] = {
+				['NATO'] = 'Fire Finder',
+			},
+		},
+		['CH_MIM104_ANMPQ65_HEMTT'] = {
+			['name'] = {
+				['NATO'] = 'Fire Finder',
+			},
+		},
+		['CH_MIM104_ANMPQ65A'] = {
+			['name'] = {
+				['NATO'] = 'Fire Finder',
+			},
+		},
+		['CH_MIM104_ANMPQ65A_HEMTT'] = {
+			['name'] = {
+				['NATO'] = 'Fire Finder',
+			},
+		},
+		['CH_MIM104_LTAMDS'] = {
+			['name'] = {
+				['NATO'] = 'Fire Finder',
+			},
+		},
+		['CH_MIM104_LTAMDS_HEMTT'] = {
+			['name'] = {
+				['NATO'] = 'Fire Finder',
+			},
+		},
+	},
+	['misc'] = {
+		['CH_MIM104_ECS'] = {
+			['required'] = true,
+		},
+		['CH_MIM104_EPP'] = {
+			['required'] = true,
+		},
+	},
+	['launchers'] = {
+		['CH_MIM104_M903_PAC2'] = {
+		},
+		['CH_MIM104_M903_PAC2_HEMTT'] = {
+		},
+		['CH_MIM104_M903_PAC3'] = {
+		},
+		['CH_MIM104_M903_PAC3_HEMTT'] = {
+		},
+		
+	},
+	['name']  = {
+		['NATO'] = 'SAM-10 Guardian'
+	},
+	['harm_detection_chance'] = 95,
+	['can_engage_harm'] = true
+}	
+
+samTypesDB['NASAMS_CH'] = {
+	['type'] = 'complex',
+	['searchRadar'] = {
+		['CH_NASAMS3_SR'] = {
+		},
+	},
+	['misc'] = {
+		['CH_NASAMS3_CP'] = {
+			['required'] = false,
+		},
+	},
+	['launchers'] = {
+		['CH_NASAMS3_LN_AMRAAM_ER'] = {
+		},
+		['CH_NASAMS3_LN_AIM9X2'] = {
+		},
+	},
+	['name']  = {
+		['NATO'] = 'NASAMS'
+	},
+	['harm_detection_chance'] = 86,
+	['can_engage_harm'] = true
+}	
+
+samTypesDB['THAAD'] = {
+	['type'] = 'complex',
+	['searchRadar'] = {
+		['CH_THAAD_ANTPY2'] = {
+		},
+	},
+	['misc'] = {
+		['CH_THAAD_TFCC'] = {
+			['required'] = true,
+		},
+	},
+	['launchers'] = {
+		['CH_THAAD_M1120'] = {
+		},
+	},
+	['name']  = {
+		['NATO'] = 'THAAD'
+	},
+	['harm_detection_chance'] = 98,
+	['can_engage_harm'] = true
+}	
+
+--[[
+
+--]]
+
+end
+
+
+
+do
+-- this file contains the definitions for the CurrentHill Russian Military Asset Pack: https://www.currenthill.com/russia
+
+samTypesDB['CH_StormerHVM'] = {
+	['type'] = 'single',
+	['launchers'] = {
+		['CH_StormerHVM'] = {
+		},
+	},
+	['name'] = {
+		['NATO'] = 'Stormer HVM',
+	},
+	['harm_detection_chance'] = 5,
+	['can_engage_harm'] = true
+	
+}
+
+samTypesDB['Sky Sabre'] = {
+	['type'] = 'complex',
+	['searchRadar'] = {
+		['CH_SkySabreGiraffe'] = {
+		},
+	},
+	['misc'] = {
+		['CH_SkySabreC2'] = {
+			['required'] = true,
+		},
+	},
+	['launchers'] = {
+		['CH_SkySabre'] = {
+		},
+	},
+	['name']  = {
+		['NATO'] = 'Sky Sabre'
+	},
+	['harm_detection_chance'] = 59,
+	['can_engage_harm'] = true
+}	
+
+--[[
+
+--]]
+
+end
+
+
+
+do
+-- this file contains the definitions for the CurrentHill Russian Military Asset Pack: https://www.currenthill.com/russia
+
+samTypesDB['FlaRakRad'] = {
+	['type'] = 'single',
+	['searchRadar'] = {
+		['CH_FlaRakRad'] = {
+		},
+	},
+	['launchers'] = {
+		['CH_FlaRakRad'] = {
+		},
+	},
+	['name'] = {
+		['NATO'] = 'FlaRakRad',
+	},
+	['harm_detection_chance'] = 32,
+	['can_engage_harm'] = true
+	
+}
+
+samTypesDB['Skynex SPAAG'] = {
+	['type'] = 'single',
+	['searchRadar'] = {
+		['CH_SkynexHX'] = {
+		},
+	},
+	['launchers'] = {
+		['CH_SkynexHX'] = {
+		},
+	},
+	['name'] = {
+		['NATO'] = 'Skynex SPAAGM',
+	},
+	['harm_detection_chance'] = 22,
+	['can_engage_harm'] = true
+	
+}
+
+samTypesDB['Wiesel Ozelot'] = {
+	['type'] = 'single',
+	['launchers'] = {
+		['CH_Wiesel2Ozelot'] = {
+		},
+	},
+	['name'] = {
+		['NATO'] = 'Ozelot',
+	},
+	['harm_detection_chance'] = 5,
+	['can_engage_harm'] = false
+	
+}
+
+samTypesDB['Boxer SPAAGM'] = {
+	['type'] = 'single',
+	['launchers'] = {
+		['CH_BoxerSkyranger'] = {
+		},
+	},
+	['name'] = {
+		['NATO'] = 'Boxer SPAAGM',
+	},
+	['harm_detection_chance'] = 8,
+	['can_engage_harm'] = false
+	
+}
+
+samTypesDB['Skynex C-RAM'] = {
+	['type'] = 'complex',
+	['searchRadar'] = {
+		['CH_Skyshield_FCU'] = {
+		},
+	},
+	['launchers'] = {
+		['CH_Skyshield_Gun'] = {
+		},
+	},
+	['name']  = {
+		['NATO'] = 'Skynex C-RAM'
+	},
+	['harm_detection_chance'] = 28,
+	['can_engage_harm'] = true
+}	
+
+samTypesDB['IRIS-T SML'] = {
+	['type'] = 'complex',
+	['searchRadar'] = {
+		['CH_TRML4D'] = {
+		},
+	},
+	['misc'] = {
+		['CH_IRIST_SLM_C2'] = {
+			['required'] = true,
+		},
+	},
+	['launchers'] = {
+		['CH_IRIST_SLM'] = {
+		},
+	},
+	['name']  = {
+		['NATO'] = 'IRIS-T SLM'
+	},
+	['harm_detection_chance'] = 79,
+	['can_engage_harm'] = true
+}	
+
+samTypesDB['MIM-104_GER'] = {
+	['type'] = 'complex',
+	['searchRadar'] = {
+		['CH_MIM104_ANMPQ53_KAT1'] = {
+			['name'] = {
+				['NATO'] = 'Fire Finder',
+			},
+		},
+	},
+	['misc'] = {
+		['CH_MIM104_ECS_KAT1'] = {
+			['required'] = true,
+		},
+		['CH_MIM104_EPP_KAT1'] = {
+			['required'] = true,
+		},
+	},
+	['launchers'] = {
+		['CH_MIM104_M901_PAC2_KAT1'] = {
+		},		
+	},
+	['name']  = {
+		['NATO'] = 'SAM-10 Guardian'
+	},
+	['harm_detection_chance'] = 95,
+	['can_engage_harm'] = true
+}	
+
+--[[
+
+--]]
+
+end
+
+
+
+do
+-- this file contains the definitions for the CurrentHill Russian Military Asset Pack: https://www.currenthill.com/russia
+
+samTypesDB['PGL-625'] = {
+	['type'] = 'single',
+	['searchRadar'] = {
+		['PGL_625'] = {
+		},
+	},
+	['launchers'] = {
+		['PGL_625'] = {
+		},
+	},
+	['name'] = {
+		['NATO'] = 'PGL=625 SPAAGM',
+	},
+	['harm_detection_chance'] = 24,
+	['can_engage_harm'] = true
+	
+}
+
+samTypesDB['HQ-17A'] = {
+	['type'] = 'single',
+	['searchRadar'] = {
+		['HQ17A'] = {
+		},
+	},
+	['launchers'] = {
+		['HQ17A'] = {
+		},
+	},
+	['name'] = {
+		['NATO'] = 'SA-22 Greyhound',
+	},
+	['harm_detection_chance'] = 56,
+	['can_engage_harm'] = true
+	
+}
+
+samTypesDB['PGZ-09'] = {
+	['type'] = 'single',
+	['searchRadar'] = {
+		['CH_PGZ09'] = {
+		},
+	},
+	['launchers'] = {
+		['CH_PGZ09'] = {
+		},
+	},
+	['name'] = {
+		['NATO'] = 'PGZ-09',
+	},
+	['harm_detection_chance'] = 14,
+	['can_engage_harm'] = true
+	
+}
+
+
+samTypesDB['PGZ-95'] = {
+	['type'] = 'single',
+	['searchRadar'] = {
+		['CH_PGZ95'] = {
+		},
+	},
+	['launchers'] = {
+		['CH_PGZ95'] = {
+		},
+	},
+	['name'] = {
+		['NATO'] = 'PGZ-95',
+	},
+	['harm_detection_chance'] = 16,
+	['can_engage_harm'] = true
+	
+}
+
+samTypesDB['LD-3000'] = {
+	['type'] = 'single',
+	['searchRadar'] = {
+		['CH_LD3000'] = {
+		},
+	},
+	['launchers'] = {
+		['CH_LD3000'] = {
+		},
+	},
+	['name'] = {
+		['NATO'] = 'LD-3000',
+	},
+	['harm_detection_chance'] = 22,
+	['can_engage_harm'] = true
+	
+}
+
+samTypesDB['LD-3000_stationery'] = {
+	['type'] = 'single',
+	['searchRadar'] = {
+		['CH_LD3000_stationary'] = {
+		},
+	},
+	['launchers'] = {
+		['CH_LD3000_stationary'] = {
+		},
+	},
+	['name'] = {
+		['NATO'] = 'LD-3000',
+	},
+	['harm_detection_chance'] = 22,
+	['can_engage_harm'] = true
+	
+}
+
+samTypesDB['HQ-22'] = {
+	['type'] = 'complex',
+	['searchRadar'] = {
+		['CH_HQ22_STR'] = {
+		},
+		['CH_HQ22_SR'] = {
+		},
+	},
+	['launchers'] = {
+		['CH_HQ22_LN'] = {
+		},
+	},
+	['name']  = {
+		['NATO'] = 'HQ-22 (FK-3)'
+	},
+	['harm_detection_chance'] = 92,
+	['can_engage_harm'] = true
+}	
+
+-- The THAAD that upstream PR #113 has here is a byte-for-byte copy of the one in the
+-- US file, down to its American unit names -- a paste that went into the wrong file.
+-- Dropped: the US entry is the one that stands.
+
+--[[
+
+--]]
+
+end
+
+
+
+do
+-- Currenthill's Swedish Military Assets Pack: https://www.currenthill.com/
+--
+-- Not part of upstream PR walder/Skynet-IADS#113, which covers China, Germany, Russia,
+-- the UK and the US. Written here because the Retribution fork fields these systems and
+-- a system with no entry is rejected outright: addSAMSite calls goLive() and only then
+-- cleanUp(), so the site is left radiating and outside the network -- worse than not
+-- being in it.
+--
+-- Unit type names and the split between radars and launchers are read off the fork's own
+-- unit definitions and presets (resources/units/ground_units, resources/groups), not
+-- guessed. All of these put their radar and their launchers in one group, which is what
+-- Skynet needs: it accepts a site only if the group holds both.
+
+-- LvS-103, the Swedish IRIS-T SLM. PM103 is the surveillance radar (the HX suffix is the
+-- same radar on the heavier truck), StriE103 the fire control, Lavett103 the launchers.
+-- The Elverk103 generator and the C2 are left out on purpose: 'misc' is documentation,
+-- nothing in Skynet reads it. HARM figures are the German IRIS-T SML's -- same missile,
+-- same class of radar.
+samTypesDB['LvS-103'] = {
+	['type'] = 'complex',
+	['searchRadar'] = {
+		['CH_LvS-103_PM103'] = {
+		},
+		['CH_LvS-103_PM103_HX'] = {
+		},
+	},
+	['trackingRadar'] = {
+		['CH_LvS-103_StriE103'] = {
+		},
+	},
+	['launchers'] = {
+		['CH_LvS-103_Lavett103_Rb103A'] = {
+		},
+		['CH_LvS-103_Lavett103_Rb103B'] = {
+		},
+		['CH_LvS-103_Lavett103_HX_Rb103A'] = {
+		},
+		['CH_LvS-103_Lavett103_HX_Rb103B'] = {
+		},
+	},
+	['name']  = {
+		['NATO'] = 'LvS-103'
+	},
+	['harm_detection_chance'] = 79,
+	['can_engage_harm'] = true
+}
+
+-- RBS 70 and RBS 98 are separate systems that share one radar, the UndE 23. Both are
+-- fielded by the fork as SHORAD, and GroupTask.SHORAD maps to IadsRole.SAM, so both are
+-- handed to Skynet as SAM sites and both need an entry.
+--
+-- The two figures below are the same for each because they belong to the radar, not to
+-- the missile, and it is the same radar: 22, the band this pack gives its other modern
+-- radar SHORAD (Skynex SPAAG). Neither can engage a HARM -- the RBS 70 rides a laser
+-- beam and the RBS 98 is the IR IRIS-T SLS -- so both say so, as the pack's own IR
+-- launchers do.
+samTypesDB['RBS 70'] = {
+	['type'] = 'complex',
+	['searchRadar'] = {
+		['CH_UndE23'] = {
+		},
+	},
+	['launchers'] = {
+		['CH_RBS-70'] = {
+		},
+	},
+	['name']  = {
+		['NATO'] = 'RBS 70'
+	},
+	['harm_detection_chance'] = 22,
+	['can_engage_harm'] = false
+}
+
+samTypesDB['RBS 98'] = {
+	['type'] = 'complex',
+	['searchRadar'] = {
+		['CH_UndE23'] = {
+		},
+	},
+	['launchers'] = {
+		['CH_RBS-98'] = {
+		},
+	},
+	['name']  = {
+		['NATO'] = 'RBS 98'
+	},
+	['harm_detection_chance'] = 22,
+	['can_engage_harm'] = false
+}
+
+-- The same IRIS-T SLM the German file above already covers, under the older unit names
+-- the fork still ships (CHAP_ rather than CH_). Given its own key rather than merged into
+-- that entry so the files taken from PR #113 stay untouched and easy to re-sync; the two
+-- cannot be confused, since Skynet matches on unit type and no type appears in both. It
+-- reports under the same NATO name either way.
+samTypesDB['IRIS-T SLM CHAP'] = {
+	['type'] = 'complex',
+	['searchRadar'] = {
+		['CHAP_IRISTSLM_STR'] = {
+		},
+	},
+	['launchers'] = {
+		['CHAP_IRISTSLM_LN'] = {
+		},
+	},
+	['name']  = {
+		['NATO'] = 'IRIS-T SLM'
+	},
+	['harm_detection_chance'] = 79,
+	['can_engage_harm'] = true
+}
+
+end
 do
 
 SkynetIADSLogger = {}
@@ -3110,20 +3900,12 @@ function SkynetIADSAbstractRadarElement:jam(successProbability)
 		end
 end
 
---- Watch for inbound HARMs, if there is any point.
---
--- The scan runs every two seconds for as long as the element is live, and walks every
--- contact against every radar, so it is the most expensive thing an element does. Two
--- kinds of element can never act on what it finds, and used to run it anyway:
---
---  * a point defence, which is excluded from going silent by informOfHARM; and
---  * anything whose HARM detection chance is zero, which is Skynet's default -- it can
---    never roll high enough to react.
+--- Start periodic element maintenance (historical public name retained).
+-- HARM identification runs in SkynetIADSHARMDetection, not in this timer.
+-- Disabling this task leaves expired missiles/HARMs and stale jamming state.
 function SkynetIADSAbstractRadarElement:scanForHarms()
 	self:stopScanningForHARMs()
-	if self:getIsAPointDefence() or self:getHARMDetectionChance() <= 0 then
-		return
-	end
+	-- All live elements need missile cleanup, HARM expiry and jammer recovery.
 	self.harmScanID = mist.scheduleFunction(SkynetIADSAbstractRadarElement.evaluateIfTargetsContainHARMs, {self}, 1, 2)
 end
 
@@ -4113,8 +4895,6 @@ function SkynetIADSSamSite.evaluateMobilePhase(self)
 end
 
 end
-
-end
 do
 
 SkynetIADSSAMTrackingRadar = {}
@@ -4287,39 +5067,38 @@ function SkynetIADSHARMDetection:evaluateContacts()
 	for i = 1, #self.contacts do
 		local contact = self.contacts[i]	
 		local groundSpeed  = contact:getGroundSpeedInKnots(0)
-		--if a contact has only been hit by a radar once it's speed is 0
-		if groundSpeed == 0 then
-			return
-		end
-		local simpleAltitudeProfile = contact:getSimpleAltitudeProfile()
-		local newRadarsToEvaluate = self:getNewRadarsThatHaveDetectedContact(contact)
-		--self.iads:printOutputToLog(contact:getName().." new Radars to evaluate: "..#newRadarsToEvaluate)
-		--self.iads:printOutputToLog(contact:getName().." ground speed: "..groundSpeed)
-		if ( #newRadarsToEvaluate > 0 and contact:isIdentifiedAsHARM() == false and ( groundSpeed > SkynetIADSHARMDetection.HARM_THRESHOLD_SPEED_KTS and #simpleAltitudeProfile <= 2 ) ) then
-			local detectionProbability = self:getDetectionProbability(newRadarsToEvaluate)
-			--self.iads:printOutputToLog("DETECTION PROB: "..detectionProbability)
-			if ( self:shallReactToHARM(detectionProbability) ) then
-				contact:setHARMState(SkynetIADSContact.HARM)
-				if (self.iads:getDebugSettings().harmDefence ) then
-					self.iads:printOutputToLog("HARM IDENTIFIED: "..contact:getTypeName().." | DETECTION PROBABILITY WAS: "..detectionProbability.."%")
-				end
-			else
-				contact:setHARMState(SkynetIADSContact.NOT_HARM)
-				if (self.iads:getDebugSettings().harmDefence ) then
-					self.iads:printOutputToLog("HARM NOT IDENTIFIED: "..contact:getTypeName().." | DETECTION PROBABILITY WAS: "..detectionProbability.."%")
+		-- A first sighting has no speed yet; skip it, not the rest of the scan.
+		if groundSpeed ~= 0 then
+			local simpleAltitudeProfile = contact:getSimpleAltitudeProfile()
+			local newRadarsToEvaluate = self:getNewRadarsThatHaveDetectedContact(contact)
+			--self.iads:printOutputToLog(contact:getName().." new Radars to evaluate: "..#newRadarsToEvaluate)
+			--self.iads:printOutputToLog(contact:getName().." ground speed: "..groundSpeed)
+			if ( #newRadarsToEvaluate > 0 and contact:isIdentifiedAsHARM() == false and ( groundSpeed > SkynetIADSHARMDetection.HARM_THRESHOLD_SPEED_KTS and #simpleAltitudeProfile <= 2 ) ) then
+				local detectionProbability = self:getDetectionProbability(newRadarsToEvaluate)
+				--self.iads:printOutputToLog("DETECTION PROB: "..detectionProbability)
+				if ( self:shallReactToHARM(detectionProbability) ) then
+					contact:setHARMState(SkynetIADSContact.HARM)
+					if (self.iads:getDebugSettings().harmDefence ) then
+						self.iads:printOutputToLog("HARM IDENTIFIED: "..contact:getTypeName().." | DETECTION PROBABILITY WAS: "..detectionProbability.."%")
+					end
+				else
+					contact:setHARMState(SkynetIADSContact.NOT_HARM)
+					if (self.iads:getDebugSettings().harmDefence ) then
+						self.iads:printOutputToLog("HARM NOT IDENTIFIED: "..contact:getTypeName().." | DETECTION PROBABILITY WAS: "..detectionProbability.."%")
+					end
 				end
 			end
-		end
-		
-		if ( #simpleAltitudeProfile > 2 and contact:isIdentifiedAsHARM() ) then
-			contact:setHARMState(SkynetIADSContact.HARM_UNKNOWN)
-			if (self.iads:getDebugSettings().harmDefence ) then
-				self.iads:printOutputToLog("CORRECTING HARM STATE: CONTACT IS NOT A HARM: "..contact:getName())
+
+			if ( #simpleAltitudeProfile > 2 and contact:isIdentifiedAsHARM() ) then
+				contact:setHARMState(SkynetIADSContact.HARM_UNKNOWN)
+				if (self.iads:getDebugSettings().harmDefence ) then
+					self.iads:printOutputToLog("CORRECTING HARM STATE: CONTACT IS NOT A HARM: "..contact:getName())
+				end
 			end
-		end
-		
-		if ( contact:isIdentifiedAsHARM() ) then
-			self:informRadarsOfHARM(contact)
+
+			if ( contact:isIdentifiedAsHARM() ) then
+				self:informRadarsOfHARM(contact)
+			end
 		end
 	end
 end
