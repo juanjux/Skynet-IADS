@@ -62,6 +62,23 @@ way:
   HARM detection chance is zero can never roll high enough to react — and zero is
   Skynet's own default, so out of the box every site paid for a scan it could never use.
 
+### Upstream issues fixed here
+
+- **[#88](https://github.com/walder/Skynet-IADS/issues/88) — the radio menu and the
+  status text went to everybody.** `addRadioMenu` used `missionCommands.addSubMenu`,
+  which has no coalition, and the logger used `trigger.action.outText`. An enemy pilot
+  could open F10, choose *show IADS Status* or *show contacts* for the network he was
+  flying against, and read its whole state and every contact it was tracking. Both are
+  scoped to the network's own coalition now.
+- **[#107](https://github.com/walder/Skynet-IADS/issues/107) — C-RAM point defences
+  never engaged bombs.** Fixed above, in the contact filter.
+- **[#85](https://github.com/walder/Skynet-IADS/issues/85) — a SAM site with no working
+  search radar stayed dark for ever**, so killing an SA-11's Snow Drift disarmed its
+  launchers. Fixed by the `hasWorkingSearchRadars` check brought in with `ActMobile`;
+  the issue itself points at baleBaron's branch for it.
+- **[#46](https://github.com/walder/Skynet-IADS/issues/46) — mobile SAMs should move
+  when a HARM is detected.** That is `ActMobile`, also brought in above.
+
 ### Build
 
 - `build-tools/build-compiled-script.ps1` no longer overwrites this README. It used to
