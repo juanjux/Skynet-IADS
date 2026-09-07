@@ -45,6 +45,15 @@ way:
 
 ### Performance and correctness (2026-09-07)
 
+- **Share launcher ammunition snapshots within a simulation instant.** Launcher
+  ammunition getters share a snapshot only while timer.getTime is unchanged. Explicit
+  setupRangeData still refreshes; launcher shot events invalidate immediately, time
+  advancement refreshes rearm state, and death reports no ammunition.
+  Eight shell-only launchers queried four times require eight getAmmo calls instead of 64.
+  Tests cover shells, missiles, empty/nil ammunition, rearm, death, explicit refresh and
+  same-instant shot invalidation.
+  Verified with the offline Lua 5.1 harness (DCS/MIST doubles, not an FPS benchmark).
+
 - **Reuse position samples within contact evaluations.** A refresh samples DCS position
   once for speed, altitude profile and stored position; a newly detected contact reuses
   its construction sample. goDark polls detected targets only once per decision,
