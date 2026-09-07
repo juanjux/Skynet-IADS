@@ -1,4 +1,4 @@
-env.info("--- SKYNET VERSION: 3.3.0 | BUILD TIME: 29.12.2023 2311Z ---")
+env.info("--- SKYNET VERSION: 3.3.0-juanjux | BUILD TIME: 07.09.2026 1508Z ---")
 do
 --this file contains the required units per sam type
 samTypesDB = {	
@@ -509,7 +509,7 @@ samTypesDB['S-300PMU1'] = {
 	['searchRadar'] = {
 		['S-300PMU1 40B6MD sr'] = s300PMU140B6MDsr,
 		['S-300PMU1 64N6E sr'] = s300PMU164N6Esr,
-		
+
 		['S-300PS 40B6MD sr'] = {
 			['name'] = {
 				['NATO'] = '',
@@ -555,7 +555,7 @@ samTypesDB['S-300PMU1'] = {
 	},
 	['harm_detection_chance'] = 90,
 	['can_engage_harm'] = true
-}	
+}
 
 --[[ Units in the SA-23 Group:
 2020-12-11 16:40:52.072 INFO    SCRIPTING: S-300VM 9A82ME ln
@@ -600,7 +600,7 @@ samTypesDB['S-300VM'] = {
 	},
 	['harm_detection_chance'] = 90,
 	['can_engage_harm'] = true
-}	
+}
 
 --[[ Units in the SA-10B Group:
 2021-01-01 20:39:14.413 INFO    SCRIPTING: S-300PS SA-10B 40B6MD MAST sr
@@ -619,7 +619,18 @@ samTypesDB['S-300PS'] = {
 				['NATO'] = 'Clam Shell',
 			},
 		},
+		-- HighDigitSAMs Ultimate Compilation renamed the SA-10B radars.
+		['S-300PS SA-10B 76N6E sr'] = {
+			['name'] = {
+				['NATO'] = 'Clam Shell',
+			},
+		},
 		['S-300PS 64H6E TRAILER sr'] = {
+		},
+		['S-300PS 64H6E MOD sr'] = {
+			['name'] = {
+				['NATO'] = 'Big Bird',
+			},
 		},
 	},
 	['trackingRadar'] = {
@@ -627,12 +638,14 @@ samTypesDB['S-300PS'] = {
 		},
 		['S-300PS SA-10B 40B6M MAST tr'] = {
 		},
+		['S-300PS SA-10B 30N6 MAST tr'] = {
+		},
 		['S-300PS 40B6M tr'] = {
 		},
 		['S-300PMU1 40B6M tr'] = {
-		},	
+		},
 		['S-300PMU1 30N6E tr'] = {
-		},		
+		},
 	},
 	['misc'] = {
 		['S-300PS SA-10B 54K6 cp'] = {
@@ -643,6 +656,9 @@ samTypesDB['S-300PS'] = {
 		['S-300PS 5P85SE_mod ln'] = {
 		},
 		['S-300PS 5P85SU_mod ln'] = {
+		},
+		-- SA-10A S-300PT launcher (Ultimate Compilation) can co-appear.
+		['S-300PS 5P85_1_mod ln'] = {
 		},
 	},
 	['name']  = {
@@ -694,7 +710,8 @@ samTypesDB['Buk-M2'] = {
 	['name'] = {
 		['NATO'] = 'SA-17 Grizzly',
 	},
-	['harm_detection_chance'] = 90
+	['harm_detection_chance'] = 90,
+	['can_engage_harm'] = true
 }
 
 --[[
@@ -780,9 +797,23 @@ samTypesDB['S-300PMU2'] = {
 		},
 		['S-300PMU1 40B6MD sr'] = s300PMU140B6MDsr,
 		['S-300PMU1 64N6E sr'] = s300PMU164N6Esr,
+
+		['S-300PS 40B6MD sr'] = {
+			['name'] = {
+				['NATO'] = '',
+			},
+		},
+		['S-300PS 64H6E sr'] = {
+			['name'] = {
+				['NATO'] = '',
+			},
+		},
 	},
 	['trackingRadar'] = {
 		['S-300PMU2 92H6E tr'] = {
+		},
+		-- Ultimate Compilation mast-mounted Grave Stone (id "40B6M tr").
+		['S-300PMU2 40B6M tr'] = {
 		},
 		['S-300PS 40B6M tr'] = {
 		},
@@ -807,12 +838,169 @@ samTypesDB['S-300PMU2'] = {
 	['can_engage_harm'] = true
 }
 
+-- HighDigitSAMs Ultimate Compilation additions (S-400, S-300V4, SAMP/T,
+-- Pantsir-SM). These site types are new to the compilation and were not in
+-- the vendored Skynet build; profiles are hand-added here following the same
+-- structure as the S-300 family above.
+
+samTypesDB['S-400'] = {
+	['type'] = 'complex',
+	['searchRadar'] = {
+		['S-400 91N6E sr'] = {
+			['name'] = {
+				['NATO'] = 'Big Bird',
+			},
+		},
+		['S-400 96L6E sr'] = {
+			['name'] = {
+				['NATO'] = 'Cheese Board',
+			},
+		},
+		['S-400 96L6E mast sr'] = {
+			['name'] = {
+				['NATO'] = 'Cheese Board',
+			},
+		},
+	},
+	['trackingRadar'] = {
+		['S-400 92N6E tr'] = {
+			['name'] = {
+				['NATO'] = 'Grave Stone',
+			},
+		},
+		['S-400 92N6E mast tr'] = {
+			['name'] = {
+				['NATO'] = 'Grave Stone',
+			},
+		},
+	},
+	['misc'] = {
+		['S-400 55K6 cp'] = {
+			['required'] = true,
+		},
+	},
+	['launchers'] = {
+		['S-400 51P6A ln'] = {
+		},
+		['S-400 51P6A (9M96E2) ln'] = {
+		},
+		['S-400 51P6A (40N6E) ln'] = {
+		},
+	},
+	['name']  = {
+		['NATO'] = 'SA-21 Growler'
+	},
+	['harm_detection_chance'] = 90,
+	['can_engage_harm'] = true
+}
+
+samTypesDB['S-300V4'] = {
+	['type'] = 'complex',
+	['searchRadar'] = {
+		['S-300V4 9S15MDE sr'] = {
+			['name'] = {
+				['NATO'] = 'Bill Board',
+			},
+		},
+		['S-300V4 9S19M-1E sr'] = {
+			['name'] = {
+				['NATO'] = 'High Screen',
+			},
+		},
+	},
+	['trackingRadar'] = {
+		['S-300V4 9S32M-1E tr'] = {
+			['name'] = {
+				['NATO'] = 'Grill Pan',
+			},
+		},
+	},
+	['misc'] = {
+		['S-300V4 9S457-2E cp'] = {
+			['required'] = true,
+		},
+	},
+	['launchers'] = {
+		['S-300V4 9A82M-2E ln'] = {
+		},
+		['S-300V4 9A83M-2E ln'] = {
+		},
+		['S-300V4 9A84M-2E ln'] = {
+		},
+	},
+	['name']  = {
+		['NATO'] = 'SA-23 Antey-4000'
+	},
+	['harm_detection_chance'] = 90,
+	['can_engage_harm'] = true
+}
+
+samTypesDB['SAMP/T'] = {
+	['type'] = 'complex',
+	['searchRadar'] = {
+		-- ARABEL / Ground Fire 300 are multifunction radars, so they act as
+		-- both the search and the tracking radar for the battery.
+		['SAMPT_MRI_ARABEL'] = {
+			['name'] = {
+				['NATO'] = 'Arabel',
+			},
+		},
+		['SAMPT_MRI_GF300'] = {
+			['name'] = {
+				['NATO'] = 'Ground Fire 300',
+			},
+		},
+	},
+	['trackingRadar'] = {
+		['SAMPT_MRI_ARABEL'] = {
+		},
+		['SAMPT_MRI_GF300'] = {
+		},
+	},
+	['misc'] = {
+		['SAMPT_MC'] = {
+			['required'] = true,
+		},
+	},
+	['launchers'] = {
+		['SAMPT_MLT_Blk1'] = {
+		},
+		['SAMPT_MLT_Blk1NT'] = {
+		},
+	},
+	['name']  = {
+		['NATO'] = 'SAMP/T'
+	},
+	['harm_detection_chance'] = 90,
+	['can_engage_harm'] = true
+}
+
+samTypesDB['Pantsir-SM'] = {
+	['type'] = 'single',
+	['searchRadar'] = {
+		['Pantsir_SM'] = {
+		},
+	},
+	['launchers'] = {
+		['Pantsir_SM'] = {
+		},
+	},
+	['name']  = {
+		['NATO'] = 'SA-22 Greyhound'
+	},
+	['harm_detection_chance'] = 90,
+	['can_engage_harm'] = true,
+	['fire_on_march'] = true
+}
+
 --[[
 
 --]]
 end
 
 
+
+do
 
 do
 
@@ -2293,6 +2481,13 @@ function SkynetIADSAbstractRadarElement:informChildrenOfStateChange()
 	self.iads:getMooseConnector():update()
 end
 
+function SkynetIADSAbstractRadarElement:hasWorkingSearchRadars()
+	for i, searchRadar in pairs(self.searchRadars) do
+		if searchRadar:isRadarWorking() then return true end
+	end
+	return false
+end
+
 function SkynetIADSAbstractRadarElement:setToCorrectAutonomousState()
 	local parents = self:getParentRadars()
 	for i = 1, #parents do
@@ -2747,7 +2942,7 @@ function SkynetIADSAbstractRadarElement:isTargetInRange(target)
 		end
 	end
 	
-	if self.goLiveRange == SkynetIADSAbstractRadarElement.GO_LIVE_WHEN_IN_KILL_ZONE then
+	if not self:hasWorkingSearchRadars() or self.goLiveRange == SkynetIADSAbstractRadarElement.GO_LIVE_WHEN_IN_KILL_ZONE then
 		
 		isLauncherInRange = ( #self.launchers == 0 )
 		for i = 1, #self.launchers do
@@ -2861,6 +3056,11 @@ function SkynetIADSAbstractRadarElement:goSilentToEvadeHARM(timeToImpact)
 	end
 	self.harmSilenceID = mist.scheduleFunction(SkynetIADSAbstractRadarElement.finishHarmDefence, {self}, timer.getTime() + self.harmShutdownTime, 1)
 	self:goDark()
+
+	-- if we are a mobile SkynetIADSSamSite and harmShutdownTime exceeds mobileMaxEmissionTime, we might as well relocate right now
+	if(getmetatable(self) == SkynetIADSSamSite and self:getActMobile() and not self:getIsAPointDefence() and not self:getAutonomousState() and self.mobilePhase == SkynetIADSSamSite.MOBILE_PHASE_SHOOT and timer.getTime() + self.harmShutdownTime > self.mobilePhaseBeginTime + self.mobilePhaseEmissionTimeMax) then
+		self:relocateNow(self:selectNewLocation())
+	end
 end
 
 function SkynetIADSAbstractRadarElement:getHARMShutdownTime()
@@ -3550,12 +3750,25 @@ do
 SkynetIADSSamSite = {}
 SkynetIADSSamSite = inheritsFrom(SkynetIADSAbstractRadarElement)
 
+SkynetIADSSamSite.MOBILE_PHASE_HIDE = 1
+SkynetIADSSamSite.MOBILE_PHASE_SHOOT = 2
+SkynetIADSSamSite.MOBILE_PHASE_SCOOT = 3
+
 function SkynetIADSSamSite:create(samGroup, iads)
 	local sam = self:superClass():create(samGroup, iads)
 	setmetatable(sam, self)
 	self.__index = self
 	sam.targetsInRange = false
 	sam.goLiveConstraints = {}
+	sam.actMobile = false
+	sam.mobilePhase = SkynetIADSSamSite.MOBILE_PHASE_HIDE
+	sam.mobilePhaseBeginTime = 0 -- timestamp for when mobilePhase was changed
+	sam.mobileSiteZone = nil -- current site we are moving towards, set when phase changes to SCOOT
+	sam.mobileScootZones = nil -- pre defined nice spots to select, may be nil
+	sam.mobilePhaseEvaluateTaskID = nil
+	sam.mobilePhaseEmissionTimeMax = 60*3     -- max time from going live until packing up and relocating
+	sam.mobileScootDistanceMin = 1000
+	sam.mobileScootDistanceMax = 2000
 	return sam
 end
 
@@ -3600,7 +3813,7 @@ function SkynetIADSSamSite:isDestroyed()
 		if radar:isExist() == true then
 			isDestroyed = false
 		end
-	end	
+	end
 	return isDestroyed
 end
 
@@ -3619,7 +3832,177 @@ function SkynetIADSSamSite:informOfContact(contact)
 	if ( self.targetsInRange == false and self:areGoLiveConstraintsSatisfied(contact) == true and self:isTargetInRange(contact) and ( contact:isIdentifiedAsHARM() == false or ( contact:isIdentifiedAsHARM() == true and self:getCanEngageHARM() == true ) ) ) then
 		self:goLive()
 		self.targetsInRange = true
+
+		--this way we make all units aware of the first contact that triggered this SAM site
+		for i, unit in pairs(self:getDCSRepresentation():getUnits()) do
+			unit:getController():knowTarget(contact:getDCSRepresentation())
+		end
 	end
+end
+
+function SkynetIADSSamSite:getActMobile()
+	return self.actMobile
+end
+
+function SkynetIADSSamSite:setActMobile(enable, emissionTimeMax, scootDistanceMin, scootDistanceMax, scootZones)
+	if emissionTimeMax then self.mobilePhaseEmissionTimeMax = emissionTimeMax end
+	if scootDistanceMin then self.mobileScootDistanceMin = scootDistanceMin end
+	if scootDistanceMax then self.mobileScootDistanceMax = scootDistanceMax end
+	self:setMobileScootZones(scootZones)
+
+	if not self.actMobile and enable then
+		self.actMobile = true
+		self.mobilePhaseEvaluateTaskID = mist.scheduleFunction(SkynetIADSSamSite.evaluateMobilePhase,{self},1, 5)
+	elseif self.actMobile and not enable then
+		--TODO: implement this
+		self.actMobile = false
+	end
+	return self
+end
+
+function SkynetIADSSamSite:setMobileScootZones(triggerZoneNameTable)
+	self.mobileScootZones = triggerZoneNameTable
+end
+
+function SkynetIADSSamSite:relocateNow(newSiteZone)
+	if self.mobilePhase == SkynetIADSSamSite.MOBILE_PHASE_HIDE
+	or self.mobilePhase == SkynetIADSSamSite.MOBILE_PHASE_SHOOT then
+		self.mobilePhase = SkynetIADSSamSite.MOBILE_PHASE_SCOOT
+		self.mobilePhaseBeginTime = timer.getTime()
+		if not self.dataBaseSupportedTypesCanFireOnMarch then
+			self:goDark()
+			self:addGoLiveConstraint("relocating",function () return false end)
+			self:getController():setOption(AI.Option.Ground.id.ALARM_STATE, AI.Option.Ground.val.ALARM_STATE.GREEN)
+			self:getController():setOption(AI.Option.Air.id.ROE, AI.Option.Air.val.ROE.WEAPON_HOLD)
+		end
+
+		if self.mobilePhaseEvaluateTaskID ~= nil then
+			mist.removeFunction(self.mobilePhaseEvaluateTaskID)
+		end
+		self.mobilePhaseEvaluateTaskID = mist.scheduleFunction(SkynetIADSSamSite.evaluateMobilePhase,{self},1,5)
+	end
+	self.mobileSiteZone = newSiteZone
+
+	local formation
+	local ignoreRoads
+	if land.getSurfaceType({x = self.mobileSiteZone.point.x,y = self.mobileSiteZone.point.z}) == land.SurfaceType.ROAD then
+		formation = "On road"
+		ignoreRoads = false
+	else
+		formation = "Diamond"
+		ignoreRoads = true
+	end
+
+	local mistZone = {}
+	mistZone.point = self.mobileSiteZone.point
+	mistZone.radius = 1 --move dead center
+	mist.groupToRandomZone(self:getDCSRepresentation(), mistZone, formation, nil, 80, ignoreRoads)
+
+	--have mobile point defences follow, if possible
+	for i = 1, #self.pointDefences do
+		if self.pointDefences[i]:getActMobile() then
+			self.pointDefences[i]:relocateNow(newSiteZone)
+		end
+	end
+end
+
+function SkynetIADSSamSite:selectNewLocation()
+	local newZone
+	if self.mobileScootZones == nil then --no pre-defined zones found, pick arbitrary direction, prefer to be on road
+		local currentPosition = mist.getLeadPos(self:getDCSRepresentation())
+		local vec2Rand
+
+		for i = 1, 10 do
+			vec2Rand = mist.getRandPointInCircle(currentPosition,self.mobileScootDistanceMax, self.mobileScootDistanceMin)
+
+			if i <= 5 then
+				local vec2Road = {}
+				local distance
+				vec2Road.x, vec2Road.y = land.getClosestPointOnRoads("roads",vec2Rand.x,vec2Rand.y)
+				distance = mist.utils.get2DDist(currentPosition, vec2Road)
+				if distance < self.mobileScootDistanceMax and distance > self.mobileScootDistanceMin then
+					vec2Rand = vec2Road
+				end
+			end
+
+			local surfaceType = land.getSurfaceType(vec2Rand)
+			if (surfaceType == land.SurfaceType.LAND or surfaceType == land.SurfaceType.ROAD) and mist.terrainHeightDiff(vec2Rand,50) < 5 then
+				break
+			end
+		end
+
+		newZone = {}
+		newZone.radius = 50
+		newZone.point = {x = vec2Rand.x, y = land.getHeight(vec2Rand), z = vec2Rand.y}
+	else -- use pre-defined zones
+		--TODO: keep track of hot spots
+		--TODO: coordinate within battalion
+		local currentPosition = mist.getLeadPos(self:getDCSRepresentation())
+		for i = 1, 10 do
+			newZone = mist.DBs.zonesByName[self.mobileScootZones[math.random(1, #self.mobileScootZones)]]
+			local distance = mist.utils.get3DDist(currentPosition, newZone.point)
+			if distance > self.mobileScootDistanceMin and distance < self.mobileScootDistanceMax then
+				break
+			end
+		end
+	end
+
+	return newZone
+end
+
+function SkynetIADSSamSite.evaluateMobilePhase(self)
+	-- check if our mission is over
+	if self:isDestroyed() then
+		if self.mobilePhaseEvaluateTaskID ~= nil then
+			mist.removeFunction(self.mobilePhaseEvaluateTaskID)
+			self.mobilePhaseEvaluateTaskID = nil
+		end
+		return
+	end
+
+	if self.mobilePhase == SkynetIADSSamSite.MOBILE_PHASE_HIDE and self.goLiveTime > 0 then
+		--emission has begun, entering shooting phase
+		self.mobilePhase = SkynetIADSSamSite.MOBILE_PHASE_SHOOT
+		self.mobilePhaseBeginTime = self.goLiveTime
+		if self.mobilePhaseEvaluateTaskID ~= nil then
+			mist.removeFunction(self.mobilePhaseEvaluateTaskID)
+		end
+		self.mobilePhaseEvaluateTaskID = mist.scheduleFunction(SkynetIADSSamSite.evaluateMobilePhase,{self},self.mobilePhaseBeginTime + self.mobilePhaseEmissionTimeMax,5)
+	elseif self.mobilePhase == SkynetIADSSamSite.MOBILE_PHASE_SHOOT and not self:hasMissilesInFlight() and not self:getIsAPointDefence() and self:getAutonomousState() == false then
+		--find a new location
+		self:relocateNow(self:selectNewLocation())
+	elseif self.mobilePhase == SkynetIADSSamSite.MOBILE_PHASE_SCOOT then
+		--check if we are close enough to our destination
+		--TODO: better check
+		if mist.utils.get2DDist(mist.getLeadPos(self:getDCSRepresentation()), self.mobileSiteZone.point) < self.mobileSiteZone.radius
+		or (self:getAutonomousState() == true and self:getAutonomousBehaviour() == SkynetIADSAbstractRadarElement.AUTONOMOUS_STATE_DCS_AI) then --FIXME: maybe make DCS_AI Autonomous keep on moving to intended spot?
+			--close enough, setup and wait
+			self.mobilePhase = SkynetIADSSamSite.MOBILE_PHASE_HIDE
+			self.mobilePhaseBeginTime = timer.getTime()
+			self.goLiveTime = 0
+			if not self.dataBaseSupportedTypesCanFireOnMarch then
+				self:removeGoLiveConstraint("relocating")
+				self:getController():setOption(AI.Option.Ground.id.ALARM_STATE, AI.Option.Ground.val.ALARM_STATE.RED)
+				self:getController():setOption(AI.Option.Air.id.ROE, AI.Option.Air.val.ROE.WEAPON_FREE)
+			end
+
+			--update radar association
+			for i=1, #self.parentRadars do
+				for c=1, #self.parentRadars[i].childRadars do
+					if self.parentRadars[i].childRadars[c] == self then
+						table.remove(self.parentRadars[i].childRadars, c)
+						break
+					end
+				end
+			end
+			self:clearParentRadars()
+			self:clearChildRadars()
+			self.iads:buildRadarCoverageForSAMSite(self)
+			self:informChildrenOfStateChange()
+		end
+	end
+end
+
 end
 
 end

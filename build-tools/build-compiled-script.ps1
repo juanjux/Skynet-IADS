@@ -30,9 +30,12 @@ $toc = $toc -replace "\)", "`)`n"
 $readme = Get-Content ../skynet-iads-source/README_source.md
 $readmeWithTOC = $readme -replace "{TOC_PLACEHOLDER}", $toc
 
-if (Test-Path ../README.md) {
-	Remove-Item ../README.md
+# README.md is this fork's inventory of changes and is written by hand -- the build
+# used to regenerate it from README_source.md and would erase it. Upstream's
+# documentation goes to DOCUMENTATION.md instead.
+if (Test-Path ../DOCUMENTATION.md) {
+	Remove-Item ../DOCUMENTATION.md
 }
 
-Add-Content ../README.md $readmeWithTOC
+Add-Content ../DOCUMENTATION.md $readmeWithTOC
 Remove-Item ./tmp/
