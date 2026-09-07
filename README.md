@@ -45,6 +45,16 @@ way:
 
 ### Performance and correctness (2026-09-07)
 
+- **Reuse position samples within contact evaluations.** A refresh samples DCS position
+  once for speed, altitude profile and stored position; a newly detected contact reuses
+  its construction sample. goDark polls detected targets only once per decision,
+  including the no-cache startup window.
+  Tests cover motion, altitude history, death, same-instant refresh, startup freshness,
+  steady cache reuse and power/HARM shutdown. For 20 startup contacts, goDark uses one
+  detection query and 20 position reads instead of two queries and 160 reads. Contact
+  objects are not pooled across sites/cycles, and the existing cache TTL is unchanged.
+  Verified with the offline Lua 5.1 harness (DCS/MIST doubles, not an FPS benchmark).
+
 - **Short-circuit impossible target-range checks.** A failed search-range test skips
   launcher/tracking checks, a failed launcher test skips tracking checks, and kill-zone
   mode skips the working-search-radar query. Empty component lists and any-in-range
