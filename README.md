@@ -43,6 +43,25 @@ way:
 - **The four High Digit SAMs systems** Retribution had added to its own build: `S-400`,
   `S-300V4`, `SAMP/T` and `Pantsir-SM`, with their radars, launchers and command posts.
 
+### Performance and correctness (2026-09-07)
+
+- **The contact filter runs once per contact, not once per site-and-contact pair.**
+  `SkynetIADS.evaluateContacts` called `contact:getDesc()` inside its double loop, so a
+  map with 20 sites to trigger and 100 contacts made 2000 calls every cycle for an answer
+  that cannot differ between sites. `O(contacts)` now instead of `O(sites x contacts)`.
+- **That filter read every contact as a unit** — [upstream #107](https://github.com/walder/Skynet-IADS/issues/107).
+  A contact is a unit *or* a weapon and the two enumerations collide:
+  `Weapon.Category.BOMB` is 3, the same as `Unit.Category.SHIP`, and
+  `Weapon.Category.MISSILE` is 1, the same as `Unit.Category.HELICOPTER`. Bombs were
+  discarded as if they were ships and missiles got through by coincidence, which is why
+  C-RAM point defences never engaged bombs. `SkynetIADS.isAirborneContact` now asks the
+  DCS object whether it is a weapon before choosing which enumeration to read.
+- **The HARM scan no longer runs for elements that cannot act on it.** It is scheduled
+  every two seconds per live element and walks every contact against every radar. A
+  point defence is excluded from going silent by `informOfHARM`, and an element whose
+  HARM detection chance is zero can never roll high enough to react — and zero is
+  Skynet's own default, so out of the box every site paid for a scan it could never use.
+
 ### Build
 
 - `build-tools/build-compiled-script.ps1` no longer overwrites this README. It used to
