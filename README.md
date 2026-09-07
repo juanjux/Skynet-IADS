@@ -45,6 +45,15 @@ way:
 
 ### Performance and correctness (2026-09-07)
 
+- **Filter jammer candidates before terrain LOS.** Known/active emitter lookup is a
+  direct table access. Unsupported or disabled sites skip radar-list construction;
+  out-of-range radars skip terrain LOS. Eligible radars still receive one jamming
+  attempt each, preserving attempt order and probability functions.
+  Tests cover unknown/disabled/custom emitters, the inclusive range boundary, blocked LOS,
+  multiple radar attempts and emitter destruction. No early exit after the first
+  successful radar is introduced.
+  Verified with the offline Lua 5.1 harness (DCS/MIST doubles, not an FPS benchmark).
+
 - **Dispatch world events to affected IADS elements.** One world handler per IADS routes
   SHOT/DEAD events through engine-object subscriptions instead of asking every element
   to inspect every event. Shared power/connection nodes, group members and later births
