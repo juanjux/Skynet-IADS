@@ -54,6 +54,60 @@ way:
   empty/single-site networks.
   Verified with the offline Lua 5.1 harness (DCS/MIST doubles, not an FPS benchmark).
 
+- **Share launcher ammunition snapshots within a simulation instant.** Launcher
+  ammunition getters share a snapshot only while timer.getTime is unchanged. Explicit
+  setupRangeData still refreshes; launcher shot events invalidate immediately, time
+  advancement refreshes rearm state, and death reports no ammunition.
+  Eight shell-only launchers queried four times require eight getAmmo calls instead of 64.
+  Tests cover shells, missiles, empty/nil ammunition, rearm, death, explicit refresh and
+  same-instant shot invalidation.
+  Verified with the offline Lua 5.1 harness (DCS/MIST doubles, not an FPS benchmark).
+
+- **Reuse position samples within contact evaluations.** A refresh samples DCS position
+  once for speed, altitude profile and stored position; a newly detected contact reuses
+  its construction sample. goDark polls detected targets only once per decision,
+  including the no-cache startup window.
+  Tests cover motion, altitude history, death, same-instant refresh, startup freshness,
+  steady cache reuse and power/HARM shutdown. For 20 startup contacts, goDark uses one
+  detection query and 20 position reads instead of two queries and 160 reads. Contact
+  objects are not pooled across sites/cycles, and the existing cache TTL is unchanged.
+  Verified with the offline Lua 5.1 harness (DCS/MIST doubles, not an FPS benchmark).
+
+- **Short-circuit impossible target-range checks.** A failed search-range test skips
+  launcher/tracking checks, a failed launcher test skips tracking checks, and kill-zone
+  mode skips the working-search-radar query. Empty component lists and any-in-range
+  semantics are unchanged.
+  Tests exhaustively compare 108 search/launcher/tracking/mode/working-state combinations
+  and assert that irrelevant checks are not called.
+  Verified with the offline Lua 5.1 harness (DCS/MIST doubles, not an FPS benchmark).
+
+- **Reject distant HARM tracks before heading calculations.** Each radar position is
+  sampled once. Tracks outside the existing rounded 20 NM boundary skip bearing/heading
+  work; heading and speed are read lazily at most once per notification. Existing
+  magnetic-heading conventions, rounding, strict aspect/distance limits and shutdown
+  rules are retained.
+  For 100 distant radars the test performs 100 instead of 200 radar-position reads and
+  zero instead of 100 bearing/heading calculations. No persistent position or heading
+  cache is introduced.
+  Verified with the offline Lua 5.1 harness (DCS/MIST doubles, not an FPS benchmark).
+
+- **Index contact merging and radar membership.** An auxiliary name index replaces the
+  full contact-list scan; the ordered contact array and HARM history remain intact.
+  Expiry rebuilds the index, while detecting-radar membership uses a set and HARM
+  evaluation uses a temporary membership set without aliasing the contact's array.
+  The deterministic 50-radar / 200-contact test reduces getName calls from 3,959,800 to
+  10,000, including initial insertion. Replacing/resizing the contacts array rebuilds
+  its index; callers must not replace individual entries in-place or mutate the
+  detecting-radar array behind its add method.
+  Verified with the offline Lua 5.1 harness (DCS/MIST doubles, not an FPS benchmark).
+
+- **Continue HARM evaluation after a first sighting.** A contact with zero measured
+  speed now skips only its own HARM classification, not the rest of the network scan.
+  Classification probabilities, altitude-profile rules and notifications for later
+  contacts are preserved.
+  Tests cover zero-speed contacts before, after and between established tracks.
+  Verified with the offline Lua 5.1 harness (DCS/MIST doubles, not an FPS benchmark).
+
 - **The contact filter runs once per contact, not once per site-and-contact pair.**
   `SkynetIADS.evaluateContacts` called `contact:getDesc()` inside its double loop, so a
   map with 20 sites to trigger and 100 contacts made 2000 calls every cycle for an answer
@@ -65,11 +119,53 @@ way:
   discarded as if they were ships and missiles got through by coincidence, which is why
   C-RAM point defences never engaged bombs. `SkynetIADS.isAirborneContact` now asks the
   DCS object whether it is a weapon before choosing which enumeration to read.
-- **The HARM scan no longer runs for elements that cannot act on it.** It is scheduled
-  every two seconds per live element and walks every contact against every radar. A
-  point defence is excluded from going silent by `informOfHARM`, and an element whose
-  HARM detection chance is zero can never roll high enough to react — and zero is
-  Skynet's own default, so out of the box every site paid for a scan it could never use.
+- **Periodic maintenance also runs for point defences and zero-HARM-chance sites.**
+  The earlier optimisation incorrectly treated `evaluateIfTargetsContainHARMs` as a
+  detection scan. It actually removes spent missiles, expires HARM tracks and restores
+  ROE after jamming. Skipping it could leave those states stuck. HARM identification
+  runs separately in the network's contact evaluation; its tactical rules are unchanged.
+  Offline Lua 5.1 regressions cover all three maintenance duties and task cancellation.
+
+### CurrentHill's asset packs (2026-09-07)
+
+Retribution fields CurrentHill's mods heavily and Skynet knew none of it. A system with no
+entry is not merely ignored: `addSAMSite` calls `goLive()` and only then `cleanUp()`, so
+the site is left radiating, outside the network, and beyond anything that could shut it
+down.
+
+- **[#113](https://github.com/walder/Skynet-IADS/pull/113) by HFXLegion** — thirty systems
+  across China, Germany, Russia, the UK and the US, taken as five files under
+  `skynet-iads-source/currenthill/`. Three corrections went in with them:
+  - **Fourteen unit names were wrong.** Twelve US Patriot units and two Russian ones were
+    written without the `CH_` prefix the mod uses, so those systems could never have
+    matched anything.
+  - **The Chinese file's THAAD is a byte-for-byte copy of the American one**, American
+    unit names and all -- a paste that went into the wrong file. Dropped, and the US entry
+    stands. It mattered because the files are concatenated and the later definition wins
+    in silence.
+  - Its `S-400`, `S-300V4`, `S-300PS` and `Pantsir-SM` are **not** taken. We already have
+    all four from `baron-branch` and ours are supersets: the 51P6A launcher, Pantsir's
+    `fire_on_march`, six more S-300PS units.
+- **Four Swedish systems written here**, in `...-sweden-suported-types.lua`, which the PR
+  does not cover and Retribution deploys: the `LvS-103` (ten layouts and campaigns),
+  `RBS 70` and `RBS 98` -- both SHORAD, and `GroupTask.SHORAD` is handed to Skynet as a
+  SAM site -- and the `IRIS-T SLM` under the older `CHAP_` unit names the fork still
+  ships, given its own key so the files from #113 stay pristine and easy to re-sync.
+
+Every CurrentHill launcher Retribution can field is now known to Skynet, and 21 of its 24
+radars. The three left out are meant to be: the Patriot's ECS is a control station rather
+than a radar, which is why upstream keeps it under `misc` -- a section nothing in Skynet
+reads -- and the Monolit-B is coastal, and `GroupTask.Coastal` never enters the IADS.
+
+### Two files that compiled only by accident (2026-09-07)
+
+`skynet-iads-high-digit-sams-suported-types.lua` ended on a dangling `do` and
+`skynet-iads-sam-site.lua` carried one `end` too many. Both were sliced a line short when
+they were lifted out of the `baron-branch` build. The script compiled only because the two
+cancelled each other out across every file between them, which made the build order
+load-bearing and left six files sitting inside an accidental extra block. Both are fixed;
+every source file now compiles on its own, which is also what makes them testable one at a
+time.
 
 ### Upstream issues fixed here
 
@@ -117,7 +213,8 @@ Upstream is not merging anything, so the good ones are taken here, with credit.
 
 ### Build
 
-- `build-tools/build-compiled-script.ps1` no longer overwrites this README. It used to
+- `build-tools/build-compiled-script.ps1` concatenates the six `currenthill/` files,
+  and no longer overwrites this README. It used to
   regenerate `README.md` from `README_source.md` on every build, which would erase this
   inventory; the generated documentation now goes to `DOCUMENTATION.md` instead.
 
