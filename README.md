@@ -70,6 +70,10 @@ way:
   could open F10, choose *show IADS Status* or *show contacts* for the network he was
   flying against, and read its whole state and every contact it was tracking. Both are
   scoped to the network's own coalition now.
+- **[#94](https://github.com/walder/Skynet-IADS/issues/94) — the SA-20A/B could not use
+  the Tin Shield.** HDS 2.0 lets them, both the SA-5's and the mast-mounted 40B6M that
+  came with the DCS 2.9 S-300; Skynet did not list either as an acceptable search radar
+  for the S-300PMU1 or PMU2, so a site built that way had no search radar at all.
 - **[#107](https://github.com/walder/Skynet-IADS/issues/107) — C-RAM point defences
   never engaged bombs.** Fixed above, in the contact filter.
 - **[#85](https://github.com/walder/Skynet-IADS/issues/85) — a SAM site with no working
