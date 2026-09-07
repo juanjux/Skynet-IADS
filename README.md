@@ -45,6 +45,13 @@ way:
 
 ### Performance and correctness (2026-09-07)
 
+- **Continue HARM evaluation after a first sighting.** A contact with zero measured
+  speed now skips only its own HARM classification, not the rest of the network scan.
+  Classification probabilities, altitude-profile rules and notifications for later
+  contacts are preserved.
+  Tests cover zero-speed contacts before, after and between established tracks.
+  Verified with the offline Lua 5.1 harness (DCS/MIST doubles, not an FPS benchmark).
+
 - **The contact filter runs once per contact, not once per site-and-contact pair.**
   `SkynetIADS.evaluateContacts` called `contact:getDesc()` inside its double loop, so a
   map with 20 sites to trigger and 100 contacts made 2000 calls every cycle for an answer
