@@ -45,6 +45,14 @@ way:
 
 ### Performance and correctness (2026-09-07)
 
+- **Short-circuit impossible target-range checks.** A failed search-range test skips
+  launcher/tracking checks, a failed launcher test skips tracking checks, and kill-zone
+  mode skips the working-search-radar query. Empty component lists and any-in-range
+  semantics are unchanged.
+  Tests exhaustively compare 108 search/launcher/tracking/mode/working-state combinations
+  and assert that irrelevant checks are not called.
+  Verified with the offline Lua 5.1 harness (DCS/MIST doubles, not an FPS benchmark).
+
 - **The contact filter runs once per contact, not once per site-and-contact pair.**
   `SkynetIADS.evaluateContacts` called `contact:getDesc()` inside its double loop, so a
   map with 20 sites to trigger and 100 contacts made 2000 calls every cycle for an answer
