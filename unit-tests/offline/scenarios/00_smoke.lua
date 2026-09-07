@@ -1,0 +1,12 @@
+local site, unit, iads = siteFixture()
+eq(site:isActive(),false)
+eq(site:hasWorkingPowerSource(),true)
+local contact=SkynetIADSContact:create({object=dcsUnit("contact")},site)
+contact:refresh()
+eq(contact:getName(),"contact")
+eq(contact:getAge(),0)
+iads:mergeContact(contact)
+eq(#iads:getContacts(),1)
+eq(contact:getHARMState(),SkynetIADSContact.HARM_UNKNOWN)
+site:cleanUp()
+
