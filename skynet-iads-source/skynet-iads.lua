@@ -479,9 +479,18 @@ function SkynetIADS:buildRadarCoverage()
 	
 	--then we rebuild the radar coverage
 	local abstractRadarElements = self:getAbstracRadarElements()
-	for i = 1, #abstractRadarElements do
-		local abstract = abstractRadarElements[i]
-		self:buildRadarCoverageForAbstractRadarElement(abstract)
+	for i = 1, #abstractRadarElements - 1 do
+		local first = abstractRadarElements[i]
+		for j = i + 1, #abstractRadarElements do
+			local second = abstractRadarElements[j]
+			-- Each unordered pair needs exactly two directional range checks.
+			if first:isInRadarDetectionRangeOf(second) then
+				self:buildRadarAssociation(second, first, true)
+			end
+			if second:isInRadarDetectionRangeOf(first) then
+				self:buildRadarAssociation(first, second, true)
+			end
+		end
 	end
 	
 	self:addRadarsToCommandCenters()
@@ -509,14 +518,14 @@ function SkynetIADS:buildRadarCoverageForAbstractRadarElement(abstractRadarEleme
 	end
 end
 
-function SkynetIADS:buildRadarAssociation(parent, child)
+function SkynetIADS:buildRadarAssociation(parent, child, deferStateUpdate)
 	--chilren should only be SAM sites not EW radars
 	if ( getmetatable(child) == SkynetIADSSamSite ) then
 		parent:addChildRadar(child)
 	end
 	--Only SAM Sites should have parent Radars, not EW Radars
 	if ( getmetatable(child) == SkynetIADSSamSite ) then
-		child:addParentRadar(parent)
+		child:addParentRadar(parent, deferStateUpdate)
 	end
 end
 

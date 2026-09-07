@@ -45,6 +45,15 @@ way:
 
 ### Performance and correctness (2026-09-07)
 
+- **Build radar coverage once per unordered pair.** Full coverage rebuilds compare each
+  pair in both directions exactly once. Parent-state notifications are deferred until
+  the existing final pass over all SAM sites; incremental updates retain immediate
+  notifications for newly added edges and suppress duplicate-edge notifications.
+  With 100 radar elements the directional range checks fall from 19,800 to 9,900. Tests
+  cover asymmetric coverage, repeated rebuilds, incremental additions, duplicates and
+  empty/single-site networks.
+  Verified with the offline Lua 5.1 harness (DCS/MIST doubles, not an FPS benchmark).
+
 - **The contact filter runs once per contact, not once per site-and-contact pair.**
   `SkynetIADS.evaluateContacts` called `contact:getDesc()` inside its double loop, so a
   map with 20 sites to trigger and 100 contacts made 2000 calls every cycle for an answer

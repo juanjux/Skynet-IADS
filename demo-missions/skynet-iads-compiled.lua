@@ -1,4 +1,4 @@
-env.info("--- SKYNET VERSION: 3.3.0-juanjux-fork | BUILD TIME: 07.09.2026 1550Z ---")
+env.info("--- SKYNET VERSION: 3.3.0-juanjux-coverage-pairs | BUILD TIME: 07.09.2026 1634Z ---")
 do
 --this file contains the required units per sam type
 samTypesDB = {	
@@ -1868,9 +1868,18 @@ function SkynetIADS:buildRadarCoverage()
 	
 	--then we rebuild the radar coverage
 	local abstractRadarElements = self:getAbstracRadarElements()
-	for i = 1, #abstractRadarElements do
-		local abstract = abstractRadarElements[i]
-		self:buildRadarCoverageForAbstractRadarElement(abstract)
+	for i = 1, #abstractRadarElements - 1 do
+		local first = abstractRadarElements[i]
+		for j = i + 1, #abstractRadarElements do
+			local second = abstractRadarElements[j]
+			-- Each unordered pair needs exactly two directional range checks.
+			if first:isInRadarDetectionRangeOf(second) then
+				self:buildRadarAssociation(second, first, true)
+			end
+			if second:isInRadarDetectionRangeOf(first) then
+				self:buildRadarAssociation(first, second, true)
+			end
+		end
 	end
 	
 	self:addRadarsToCommandCenters()
@@ -1898,14 +1907,14 @@ function SkynetIADS:buildRadarCoverageForAbstractRadarElement(abstractRadarEleme
 	end
 end
 
-function SkynetIADS:buildRadarAssociation(parent, child)
+function SkynetIADS:buildRadarAssociation(parent, child, deferStateUpdate)
 	--chilren should only be SAM sites not EW radars
 	if ( getmetatable(child) == SkynetIADSSamSite ) then
 		parent:addChildRadar(child)
 	end
 	--Only SAM Sites should have parent Radars, not EW Radars
 	if ( getmetatable(child) == SkynetIADSSamSite ) then
-		child:addParentRadar(parent)
+		child:addParentRadar(parent, deferStateUpdate)
 	end
 end
 
@@ -2506,9 +2515,11 @@ function SkynetIADSAbstractRadarElement:addHARMDecoy(harmDecoy)
 	table.insert(self.harmDecoys, harmDecoy)
 end
 
-function SkynetIADSAbstractRadarElement:addParentRadar(parentRadar)
-	self:insertToTableIfNotAlreadyAdded(self.parentRadars, parentRadar)
-	self:informChildrenOfStateChange()
+function SkynetIADSAbstractRadarElement:addParentRadar(parentRadar, deferStateUpdate)
+	local added = self:insertToTableIfNotAlreadyAdded(self.parentRadars, parentRadar)
+	if added and not deferStateUpdate then
+		self:informChildrenOfStateChange()
+	end
 end
 
 function SkynetIADSAbstractRadarElement:getParentRadars()
