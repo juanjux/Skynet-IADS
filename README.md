@@ -45,6 +45,15 @@ way:
 
 ### Performance and correctness (2026-09-07)
 
+- **Build radar coverage once per unordered pair.** Full coverage rebuilds compare each
+  pair in both directions exactly once. Parent-state notifications are deferred until
+  the existing final pass over all SAM sites; incremental updates retain immediate
+  notifications for newly added edges and suppress duplicate-edge notifications.
+  With 100 radar elements the directional range checks fall from 19,800 to 9,900. Tests
+  cover asymmetric coverage, repeated rebuilds, incremental additions, duplicates and
+  empty/single-site networks.
+  Verified with the offline Lua 5.1 harness (DCS/MIST doubles, not an FPS benchmark).
+
 - **Share launcher ammunition snapshots within a simulation instant.** Launcher
   ammunition getters share a snapshot only while timer.getTime is unchanged. Explicit
   setupRangeData still refreshes; launcher shot events invalidate immediately, time

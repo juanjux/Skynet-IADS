@@ -108,9 +108,11 @@ function SkynetIADSAbstractRadarElement:addHARMDecoy(harmDecoy)
 	table.insert(self.harmDecoys, harmDecoy)
 end
 
-function SkynetIADSAbstractRadarElement:addParentRadar(parentRadar)
-	self:insertToTableIfNotAlreadyAdded(self.parentRadars, parentRadar)
-	self:informChildrenOfStateChange()
+function SkynetIADSAbstractRadarElement:addParentRadar(parentRadar, deferStateUpdate)
+	local added = self:insertToTableIfNotAlreadyAdded(self.parentRadars, parentRadar)
+	if added and not deferStateUpdate then
+		self:informChildrenOfStateChange()
+	end
 end
 
 function SkynetIADSAbstractRadarElement:getParentRadars()
