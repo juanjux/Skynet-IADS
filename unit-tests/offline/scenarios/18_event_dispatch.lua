@@ -54,6 +54,7 @@ eq(iads.eventElements[a],nil);eq(iads.eventElements[b],nil)
 -- Real radar/launcher callback, including group-member death and dead-group activation.
 local runtime=SkynetIADS:create("real radar callback")
 local launcherUnit=dcsUnit("actual launcher")
+launcherUnit.id_=9010
 local radarGroup=setmetatable(dcsUnit("actual SAM group"),Group)
 radarGroup.units={launcherUnit}
 local radarSite=SkynetIADSAbstractRadarElement:create(radarGroup,runtime)
@@ -62,6 +63,14 @@ runtime.samSites={radarSite}
 local missile={isExist=function()return true end}
 emit({id=world.event.S_EVENT_SHOT,initiator=launcherUnit,weapon=missile})
 eq(radarSite:getNumberOfMissilesInFlight(),1)
+radarSite.launchers[1].ammoSnapshotTime=NOW
+emit({id=world.event.S_EVENT_SHOT,initiator={id_=9010},weapon=missile})
+eq(radarSite:getNumberOfMissilesInFlight(),2,"fresh wrapper must still track missile")
+eq(radarSite.launchers[1].ammoSnapshotTime,nil,"fresh wrapper must invalidate ammo")
+radarSite:weaponFired({id=world.event.S_EVENT_SHOT,initiator={id_=9011},weapon=missile})
+radarSite:weaponFired({id=world.event.S_EVENT_SHOT,initiator={},weapon=missile})
+radarSite:weaponFired({id=world.event.S_EVENT_SHOT,weapon=missile})
+eq(radarSite:getNumberOfMissilesInFlight(),2,"unrelated or missing initiator must not match")
 radarGroup.alive=false;launcherUnit.alive=false
 radarGroup.getUnits=function()error("must not query a destroyed group")end
 radarGroup.getName=function()error("must not query a destroyed group")end
