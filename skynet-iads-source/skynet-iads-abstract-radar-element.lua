@@ -696,8 +696,20 @@ function SkynetIADSAbstractRadarElement:jam(successProbability)
 		end
 end
 
+--- Watch for inbound HARMs, if there is any point.
+--
+-- The scan runs every two seconds for as long as the element is live, and walks every
+-- contact against every radar, so it is the most expensive thing an element does. Two
+-- kinds of element can never act on what it finds, and used to run it anyway:
+--
+--  * a point defence, which is excluded from going silent by informOfHARM; and
+--  * anything whose HARM detection chance is zero, which is Skynet's default -- it can
+--    never roll high enough to react.
 function SkynetIADSAbstractRadarElement:scanForHarms()
 	self:stopScanningForHARMs()
+	if self:getIsAPointDefence() or self:getHARMDetectionChance() <= 0 then
+		return
+	end
 	self.harmScanID = mist.scheduleFunction(SkynetIADSAbstractRadarElement.evaluateIfTargetsContainHARMs, {self}, 1, 2)
 end
 
