@@ -541,8 +541,3 @@ samTypesDB['Pantsir-SM'] = {
 
 --]]
 end
-
-
-
-do
-

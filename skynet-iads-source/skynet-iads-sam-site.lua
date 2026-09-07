@@ -257,5 +257,3 @@ function SkynetIADSSamSite.evaluateMobilePhase(self)
 end
 
 end
-
-end

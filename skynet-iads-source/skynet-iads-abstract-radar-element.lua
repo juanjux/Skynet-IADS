@@ -561,9 +561,20 @@ end
 
 
 function SkynetIADSAbstractRadarElement:goDark()
-	if (self:hasWorkingPowerSource() == false) or ( self.aiState == true ) 
-	and (self.harmSilenceID ~= nil or ( self.harmSilenceID == nil and #self:getDetectedTargets() == 0 and self:hasMissilesInFlight() == false) or ( self.harmSilenceID == nil and #self:getDetectedTargets() > 0 and self:hasMissilesInFlight() == false and self:hasRemainingAmmo() == false ) )	
-	then
+	local shouldGoDark = not self:hasWorkingPowerSource()
+	if not shouldGoDark and self.aiState == true then
+		if self.harmSilenceID ~= nil then
+			shouldGoDark = true
+		else
+			-- During the no-cache startup window a second call would poll DCS
+			-- and allocate all contacts again in this same decision.
+			local targets = self:getDetectedTargets()
+			if not self:hasMissilesInFlight() then
+				shouldGoDark = #targets == 0 or not self:hasRemainingAmmo()
+			end
+		end
+	end
+	if shouldGoDark then
 		if self:isDestroyed() == false then
 			self:getDCSRepresentation():enableEmission(false)
 		end
@@ -602,44 +613,39 @@ function SkynetIADSAbstractRadarElement:isActive()
 end
 
 function SkynetIADSAbstractRadarElement:isTargetInRange(target)
-
-	local isSearchRadarInRange = false
-	local isTrackingRadarInRange = false
-	local isLauncherInRange = false
-	
-	local isSearchRadarInRange = ( #self.searchRadars == 0 )
+	local isSearchRadarInRange = (#self.searchRadars == 0)
 	for i = 1, #self.searchRadars do
-		local searchRadar = self.searchRadars[i]
-		if searchRadar:isInRange(target) then
+		if self.searchRadars[i]:isInRange(target) then
 			isSearchRadarInRange = true
 			break
 		end
 	end
-	
-	if not self:hasWorkingSearchRadars() or self.goLiveRange == SkynetIADSAbstractRadarElement.GO_LIVE_WHEN_IN_KILL_ZONE then
-		
-		isLauncherInRange = ( #self.launchers == 0 )
+	if not isSearchRadarInRange then
+		return false
+	end
+	-- Kill-zone mode does not need the DCS sensor/working-radar query.
+	if self.goLiveRange == SkynetIADSAbstractRadarElement.GO_LIVE_WHEN_IN_KILL_ZONE or not self:hasWorkingSearchRadars() then
+		local isLauncherInRange = (#self.launchers == 0)
 		for i = 1, #self.launchers do
-			local launcher = self.launchers[i]
-			if launcher:isInRange(target) then
+			if self.launchers[i]:isInRange(target) then
 				isLauncherInRange = true
 				break
 			end
 		end
-		
-		isTrackingRadarInRange = ( #self.trackingRadars == 0 )
+		if not isLauncherInRange then
+			return false
+		end
+		if #self.trackingRadars == 0 then
+			return true
+		end
 		for i = 1, #self.trackingRadars do
-			local trackingRadar = self.trackingRadars[i]
-			if trackingRadar:isInRange(target) then
-				isTrackingRadarInRange = true
-				break
+			if self.trackingRadars[i]:isInRange(target) then
+				return true
 			end
 		end
-	else
-		isLauncherInRange = true
-		isTrackingRadarInRange = true
+		return false
 	end
-	return  (isSearchRadarInRange and isTrackingRadarInRange and isLauncherInRange )
+	return true
 end
 
 function SkynetIADSAbstractRadarElement:isInRadarDetectionRangeOf(abstractRadarElement)
@@ -697,20 +703,12 @@ function SkynetIADSAbstractRadarElement:jam(successProbability)
 		end
 end
 
---- Watch for inbound HARMs, if there is any point.
---
--- The scan runs every two seconds for as long as the element is live, and walks every
--- contact against every radar, so it is the most expensive thing an element does. Two
--- kinds of element can never act on what it finds, and used to run it anyway:
---
---  * a point defence, which is excluded from going silent by informOfHARM; and
---  * anything whose HARM detection chance is zero, which is Skynet's default -- it can
---    never roll high enough to react.
+--- Start periodic element maintenance (historical public name retained).
+-- HARM identification runs in SkynetIADSHARMDetection, not in this timer.
+-- Disabling this task leaves expired missiles/HARMs and stale jamming state.
 function SkynetIADSAbstractRadarElement:scanForHarms()
 	self:stopScanningForHARMs()
-	if self:getIsAPointDefence() or self:getHARMDetectionChance() <= 0 then
-		return
-	end
+	-- All live elements need missile cleanup, HARM expiry and jammer recovery.
 	self.harmScanID = mist.scheduleFunction(SkynetIADSAbstractRadarElement.evaluateIfTargetsContainHARMs, {self}, 1, 2)
 end
 
@@ -779,7 +777,8 @@ function SkynetIADSAbstractRadarElement:getDetectedTargets()
 				-- there are cases when a destroyed object is still visible as a target to the radar, don't add it, will cause errors everywhere the dcs object is accessed
 				if target.object then
 					local iadsTarget = SkynetIADSContact:create(target, self)
-					iadsTarget:refresh()
+					-- Creation already sampled this detection's position.
+					iadsTarget:refresh(iadsTarget:getPosition())
 					if self:isTargetInRange(iadsTarget) then
 						table.insert(self.cachedTargets, iadsTarget)
 					end
@@ -836,29 +835,37 @@ end
 
 function SkynetIADSAbstractRadarElement:informOfHARM(harmContact)
 	local radars = self:getRadars()
-		for j = 1, #radars do
-			local radar = radars[j]
-			if radar:isExist() then
-				local distanceNM =  mist.utils.metersToNM(self:getDistanceInMetersToContact(radar, harmContact:getPosition().p))
-				local harmToSAMHeading = mist.utils.toDegree(mist.utils.getHeadingPoints(harmContact:getPosition().p, radar:getPosition().p))
-				local harmToSAMAspect = self:calculateAspectInDegrees(harmContact:getMagneticHeading(), harmToSAMHeading)
-				local speedKT = harmContact:getGroundSpeedInKnots(0)
-				local secondsToImpact = self:getSecondsToImpact(distanceNM, speedKT)
-				--TODO: use tti instead of distanceNM?
-				-- when iterating through the radars, store shortest tti and work with that value??
-				if ( harmToSAMAspect < SkynetIADSAbstractRadarElement.HARM_TO_SAM_ASPECT and distanceNM < SkynetIADSAbstractRadarElement.HARM_LOOKAHEAD_NM ) then
-					self:addObjectIdentifiedAsHARM(harmContact)
-					if ( #self:getPointDefences() > 0 and self:pointDefencesGoLive() == true and self.iads:getDebugSettings().harmDefence ) then
-							self.iads:printOutputToLog("POINT DEFENCES GOING LIVE FOR: "..self:getDCSName().." | TTI: "..secondsToImpact)
+	local contactPosition = harmContact:getPosition().p
+	local heading, speedKT
+	for j = 1, #radars do
+		local radar = radars[j]
+		if radar:isExist() then
+			local radarPosition = radar:getPosition().p
+			-- Preserve the existing metre rounding and strict NM boundary.
+			local distanceNM = mist.utils.metersToNM(mist.utils.round(mist.utils.get3DDist(radarPosition, contactPosition)))
+			if distanceNM < SkynetIADSAbstractRadarElement.HARM_LOOKAHEAD_NM then
+				local harmToSAMHeading = mist.utils.toDegree(mist.utils.getHeadingPoints(contactPosition, radarPosition))
+				if heading == nil then
+					heading = harmContact:getMagneticHeading()
+				end
+				local aspect = self:calculateAspectInDegrees(heading, harmToSAMHeading)
+				if aspect < SkynetIADSAbstractRadarElement.HARM_TO_SAM_ASPECT then
+					if speedKT == nil then
+						speedKT = harmContact:getGroundSpeedInKnots(0)
 					end
-					--self.iads:printOutputToLog("Ignore HARM shutdown: "..tostring(self:shallIgnoreHARMShutdown()))
-					if ( self:getIsAPointDefence() == false and ( self:isDefendingHARM() == false or ( self:getHARMShutdownTime() < secondsToImpact ) ) and self:shallIgnoreHARMShutdown() == false) then
+					local secondsToImpact = self:getSecondsToImpact(distanceNM, speedKT)
+					self:addObjectIdentifiedAsHARM(harmContact)
+					if #self:getPointDefences() > 0 and self:pointDefencesGoLive() == true and self.iads:getDebugSettings().harmDefence then
+						self.iads:printOutputToLog("POINT DEFENCES GOING LIVE FOR: "..self:getDCSName().." | TTI: "..secondsToImpact)
+					end
+					if self:getIsAPointDefence() == false and (self:isDefendingHARM() == false or self:getHARMShutdownTime() < secondsToImpact) and self:shallIgnoreHARMShutdown() == false then
 						self:goSilentToEvadeHARM(secondsToImpact)
 						break
 					end
 				end
 			end
 		end
+	end
 end
 
 function SkynetIADSAbstractElement:addObjectIdentifiedAsHARM(harmContact)
