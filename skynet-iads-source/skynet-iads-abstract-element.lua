@@ -11,12 +11,19 @@ function SkynetIADSAbstractElement:create(dcsRepresentation, iads)
 	instance.powerSources = {}
 	instance.iads = iads
 	instance.natoName = "UNKNOWN"
-	world.addEventHandler(instance)
+	iads:registerElementEvents(instance)
 	return instance
 end
 
 function SkynetIADSAbstractElement:removeEventHandlers()
-	world.removeEventHandler(self)
+	self.iads:unregisterElementEvents(self)
+end
+
+function SkynetIADSAbstractElement:setDCSRepresentation(representation)
+	SkynetIADSAbstractDCSObjectWrapper.setDCSRepresentation(self, representation)
+	if self.iads and self.iads.eventElements[self] then
+		self.iads:registerElementEvents(self)
+	end
 end
 
 function SkynetIADSAbstractElement:cleanUp()
@@ -29,6 +36,7 @@ end
 
 function SkynetIADSAbstractElement:addPowerSource(powerSource)
 	table.insert(self.powerSources, powerSource)
+	if self.iads.eventElements[self] then self.iads:registerEventObject(self, powerSource) end
 	self:informChildrenOfStateChange()
 	return self
 end
@@ -39,6 +47,7 @@ end
 
 function SkynetIADSAbstractElement:addConnectionNode(connectionNode)
 	table.insert(self.connectionNodes, connectionNode)
+	if self.iads.eventElements[self] then self.iads:registerEventObject(self, connectionNode) end
 	self:informChildrenOfStateChange()
 	return self
 end

@@ -12,6 +12,7 @@ function SkynetIADSSAMLauncher:create(unit)
 end
 
 function SkynetIADSSAMLauncher:setupRangeData()
+	self.ammoSnapshotTime = timer.getTime()
 	self.remainingNumberOfMissiles = 0
 	self.remainingNumberOfShells = 0
 	if self:isExist() then
@@ -59,12 +60,24 @@ function SkynetIADSSAMLauncher:setupRangeData()
 	end
 end
 
+-- Cache only within one simulation instant, never across time advancement.
+-- Explicit setupRangeData and a shot invalidate/refresh the snapshot immediately.
+function SkynetIADSSAMLauncher:invalidateAmmoSnapshot()
+	self.ammoSnapshotTime = nil
+end
+
+function SkynetIADSSAMLauncher:updateAmmoSnapshot()
+	if not self:isExist() or self.ammoSnapshotTime ~= timer.getTime() then
+		self:setupRangeData()
+	end
+end
+
 function SkynetIADSSAMLauncher:getInitialNumberOfShells()
 	return self.initialNumberOfShells
 end
 
 function SkynetIADSSAMLauncher:getRemainingNumberOfShells()
-	self:setupRangeData()
+	self:updateAmmoSnapshot()
 	return self.remainingNumberOfShells
 end
 
@@ -73,7 +86,7 @@ function SkynetIADSSAMLauncher:getInitialNumberOfMissiles()
 end
 
 function SkynetIADSSAMLauncher:getRemainingNumberOfMissiles()
-	self:setupRangeData()
+	self:updateAmmoSnapshot()
 	return self.remainingNumberOfMissiles
 end
 
