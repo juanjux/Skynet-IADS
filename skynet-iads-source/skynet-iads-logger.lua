@@ -32,7 +32,10 @@ function SkynetIADSLogger:printOutput(output, typeWarning)
 		if typeWarning == true then
 			output = "WARNING: "..output
 		end
-		trigger.action.outText(output, 4)
+		-- To the side that owns the network, not to everybody: the status text names
+		-- every site and every contact, which is not an enemy pilot's to read.
+		-- Upstream walder/Skynet-IADS#88.
+		trigger.action.outTextForCoalition(self.iads:getCoalition(), output, 4)
 	end
 end
 

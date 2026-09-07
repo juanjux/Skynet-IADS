@@ -1,4 +1,4 @@
-env.info("--- SKYNET VERSION: 3.3.0-retribution-fork | BUILD TIME: 07.09.2026 1515Z ---")
+env.info("--- SKYNET VERSION: 3.3.0-juanjux-fork | BUILD TIME: 07.09.2026 1530Z ---")
 do
 --this file contains the required units per sam type
 samTypesDB = {	
@@ -1036,7 +1036,10 @@ function SkynetIADSLogger:printOutput(output, typeWarning)
 		if typeWarning == true then
 			output = "WARNING: "..output
 		end
-		trigger.action.outText(output, 4)
+		-- To the side that owns the network, not to everybody: the status text names
+		-- every site and every contact, which is not an enemy pilot's to read.
+		-- Upstream walder/Skynet-IADS#88.
+		trigger.action.outTextForCoalition(self.iads:getCoalition(), output, 4)
 	end
 end
 
@@ -1968,16 +1971,23 @@ function SkynetIADS:deactivateEarlyWarningRadars()
 	end
 end	
 
+--- The menu that shows this IADS's status, for the side that owns it.
+--
+-- It used to be added with missionCommands.addSubMenu, which has no coalition and so
+-- gives the menu to everybody: an enemy pilot could open F10 and read "show IADS
+-- Status" and "show contacts" for the network he was flying against -- its whole state,
+-- and every contact it was tracking. Upstream walder/Skynet-IADS#88.
 function SkynetIADS:addRadioMenu()
-	self.radioMenu = missionCommands.addSubMenu('SKYNET IADS '..self:getCoalitionString())
-	local displayIADSStatus = missionCommands.addCommand('show IADS Status', self.radioMenu, SkynetIADS.updateDisplay, {self = self, value = true, option = 'IADSStatus'})
-	local displayIADSStatus = missionCommands.addCommand('hide IADS Status', self.radioMenu, SkynetIADS.updateDisplay, {self = self, value = false, option = 'IADSStatus'})
-	local displayIADSStatus = missionCommands.addCommand('show contacts', self.radioMenu, SkynetIADS.updateDisplay, {self = self, value = true, option = 'contacts'})
-	local displayIADSStatus = missionCommands.addCommand('hide contacts', self.radioMenu, SkynetIADS.updateDisplay, {self = self, value = false, option = 'contacts'})
+	local side = self:getCoalition()
+	self.radioMenu = missionCommands.addSubMenuForCoalition(side, 'SKYNET IADS '..self:getCoalitionString())
+	missionCommands.addCommandForCoalition(side, 'show IADS Status', self.radioMenu, SkynetIADS.updateDisplay, {self = self, value = true, option = 'IADSStatus'})
+	missionCommands.addCommandForCoalition(side, 'hide IADS Status', self.radioMenu, SkynetIADS.updateDisplay, {self = self, value = false, option = 'IADSStatus'})
+	missionCommands.addCommandForCoalition(side, 'show contacts', self.radioMenu, SkynetIADS.updateDisplay, {self = self, value = true, option = 'contacts'})
+	missionCommands.addCommandForCoalition(side, 'hide contacts', self.radioMenu, SkynetIADS.updateDisplay, {self = self, value = false, option = 'contacts'})
 end
 
 function SkynetIADS:removeRadioMenu()
-	missionCommands.removeItem(self.radioMenu)
+	missionCommands.removeItemForCoalition(self:getCoalition(), self.radioMenu)
 end
 
 function SkynetIADS.updateDisplay(params)
