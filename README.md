@@ -63,11 +63,12 @@ way:
   discarded as if they were ships and missiles got through by coincidence, which is why
   C-RAM point defences never engaged bombs. `SkynetIADS.isAirborneContact` now asks the
   DCS object whether it is a weapon before choosing which enumeration to read.
-- **The HARM scan no longer runs for elements that cannot act on it.** It is scheduled
-  every two seconds per live element and walks every contact against every radar. A
-  point defence is excluded from going silent by `informOfHARM`, and an element whose
-  HARM detection chance is zero can never roll high enough to react — and zero is
-  Skynet's own default, so out of the box every site paid for a scan it could never use.
+- **Periodic maintenance also runs for point defences and zero-HARM-chance sites.**
+  The earlier optimisation incorrectly treated `evaluateIfTargetsContainHARMs` as a
+  detection scan. It actually removes spent missiles, expires HARM tracks and restores
+  ROE after jamming. Skipping it could leave those states stuck. HARM identification
+  runs separately in the network's contact evaluation; its tactical rules are unchanged.
+  Offline Lua 5.1 regressions cover all three maintenance duties and task cancellation.
 
 ### Upstream issues fixed here
 
