@@ -154,6 +154,13 @@ function SkynetIADSAbstractRadarElement:informChildrenOfStateChange()
 	self.iads:getMooseConnector():update()
 end
 
+function SkynetIADSAbstractRadarElement:hasWorkingSearchRadars()
+	for i, searchRadar in pairs(self.searchRadars) do
+		if searchRadar:isRadarWorking() then return true end
+	end
+	return false
+end
+
 function SkynetIADSAbstractRadarElement:setToCorrectAutonomousState()
 	local parents = self:getParentRadars()
 	for i = 1, #parents do
@@ -608,7 +615,7 @@ function SkynetIADSAbstractRadarElement:isTargetInRange(target)
 		end
 	end
 	
-	if self.goLiveRange == SkynetIADSAbstractRadarElement.GO_LIVE_WHEN_IN_KILL_ZONE then
+	if not self:hasWorkingSearchRadars() or self.goLiveRange == SkynetIADSAbstractRadarElement.GO_LIVE_WHEN_IN_KILL_ZONE then
 		
 		isLauncherInRange = ( #self.launchers == 0 )
 		for i = 1, #self.launchers do
@@ -722,6 +729,11 @@ function SkynetIADSAbstractRadarElement:goSilentToEvadeHARM(timeToImpact)
 	end
 	self.harmSilenceID = mist.scheduleFunction(SkynetIADSAbstractRadarElement.finishHarmDefence, {self}, timer.getTime() + self.harmShutdownTime, 1)
 	self:goDark()
+
+	-- if we are a mobile SkynetIADSSamSite and harmShutdownTime exceeds mobileMaxEmissionTime, we might as well relocate right now
+	if(getmetatable(self) == SkynetIADSSamSite and self:getActMobile() and not self:getIsAPointDefence() and not self:getAutonomousState() and self.mobilePhase == SkynetIADSSamSite.MOBILE_PHASE_SHOOT and timer.getTime() + self.harmShutdownTime > self.mobilePhaseBeginTime + self.mobilePhaseEmissionTimeMax) then
+		self:relocateNow(self:selectNewLocation())
+	end
 end
 
 function SkynetIADSAbstractRadarElement:getHARMShutdownTime()
