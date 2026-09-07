@@ -45,6 +45,16 @@ way:
 
 ### Performance and correctness (2026-09-07)
 
+- **Index contact merging and radar membership.** An auxiliary name index replaces the
+  full contact-list scan; the ordered contact array and HARM history remain intact.
+  Expiry rebuilds the index, while detecting-radar membership uses a set and HARM
+  evaluation uses a temporary membership set without aliasing the contact's array.
+  The deterministic 50-radar / 200-contact test reduces getName calls from 3,959,800 to
+  10,000, including initial insertion. Replacing/resizing the contacts array rebuilds
+  its index; callers must not replace individual entries in-place or mutate the
+  detecting-radar array behind its add method.
+  Verified with the offline Lua 5.1 harness (DCS/MIST doubles, not an FPS benchmark).
+
 - **The contact filter runs once per contact, not once per site-and-contact pair.**
   `SkynetIADS.evaluateContacts` called `contact:getDesc()` inside its double loop, so a
   map with 20 sites to trigger and 100 contacts made 2000 calls every cycle for an answer
