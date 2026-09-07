@@ -601,44 +601,39 @@ function SkynetIADSAbstractRadarElement:isActive()
 end
 
 function SkynetIADSAbstractRadarElement:isTargetInRange(target)
-
-	local isSearchRadarInRange = false
-	local isTrackingRadarInRange = false
-	local isLauncherInRange = false
-	
-	local isSearchRadarInRange = ( #self.searchRadars == 0 )
+	local isSearchRadarInRange = (#self.searchRadars == 0)
 	for i = 1, #self.searchRadars do
-		local searchRadar = self.searchRadars[i]
-		if searchRadar:isInRange(target) then
+		if self.searchRadars[i]:isInRange(target) then
 			isSearchRadarInRange = true
 			break
 		end
 	end
-	
-	if not self:hasWorkingSearchRadars() or self.goLiveRange == SkynetIADSAbstractRadarElement.GO_LIVE_WHEN_IN_KILL_ZONE then
-		
-		isLauncherInRange = ( #self.launchers == 0 )
+	if not isSearchRadarInRange then
+		return false
+	end
+	-- Kill-zone mode does not need the DCS sensor/working-radar query.
+	if self.goLiveRange == SkynetIADSAbstractRadarElement.GO_LIVE_WHEN_IN_KILL_ZONE or not self:hasWorkingSearchRadars() then
+		local isLauncherInRange = (#self.launchers == 0)
 		for i = 1, #self.launchers do
-			local launcher = self.launchers[i]
-			if launcher:isInRange(target) then
+			if self.launchers[i]:isInRange(target) then
 				isLauncherInRange = true
 				break
 			end
 		end
-		
-		isTrackingRadarInRange = ( #self.trackingRadars == 0 )
+		if not isLauncherInRange then
+			return false
+		end
+		if #self.trackingRadars == 0 then
+			return true
+		end
 		for i = 1, #self.trackingRadars do
-			local trackingRadar = self.trackingRadars[i]
-			if trackingRadar:isInRange(target) then
-				isTrackingRadarInRange = true
-				break
+			if self.trackingRadars[i]:isInRange(target) then
+				return true
 			end
 		end
-	else
-		isLauncherInRange = true
-		isTrackingRadarInRange = true
+		return false
 	end
-	return  (isSearchRadarInRange and isTrackingRadarInRange and isLauncherInRange )
+	return true
 end
 
 function SkynetIADSAbstractRadarElement:isInRadarDetectionRangeOf(abstractRadarElement)
