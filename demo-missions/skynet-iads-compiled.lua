@@ -1,4 +1,4 @@
-env.info("--- SKYNET VERSION: 3.3.0-juanjux-fork | BUILD TIME: 07.09.2026 1550Z ---")
+env.info("--- SKYNET VERSION: 3.3.0-juanjux-jammer-filter | BUILD TIME: 07.09.2026 1634Z ---")
 do
 --this file contains the required units per sam type
 samTypesDB = {	
@@ -3658,13 +3658,8 @@ function SkynetIADSJammer:disableFor(natoName)
 end
 
 function SkynetIADSJammer:isKnownRadarEmitter(natoName)
-	local isActive = false
-	for unitName, unit in pairs(self.jammerTable) do
-		if unitName == natoName and unit['canjam'] == true then
-			isActive = true
-		end
-	end
-	return isActive
+	local settings = self.jammerTable[natoName]
+	return settings ~= nil and settings['canjam'] == true
 end
 
 function SkynetIADSJammer:addIADS(iads)
@@ -3685,30 +3680,30 @@ function SkynetIADSJammer:getDistanceNMToRadarUnit(radarUnit)
 end
 
 function SkynetIADSJammer.runCycle(self)
-
 	if self.emitter:isExist() == false then
 		self:masterArmSafe()
 		return
 	end
-
 	for i = 1, #self.iads do
 		local iads = self.iads[i]
-		local samSites = iads:getActiveSAMSites()	
+		local samSites = iads:getActiveSAMSites()
 		for j = 1, #samSites do
 			local samSite = samSites[j]
-			local radars = samSite:getRadars()
-			local hasLOS = false
-			local distance = 0
 			local natoName = samSite:getNatoName()
-			for l = 1, #radars do
-				local radar = radars[l]
-				distance = self:getDistanceNMToRadarUnit(radar)
-				-- I try to emulate the system as it would work in real life, so a jammer can only jam a SAM site if has line of sight to at least one radar in the group
-				if self:isKnownRadarEmitter(natoName) and self:hasLineOfSightToRadar(radar) and distance <= self.maximumEffectiveDistanceNM then
-					if iads:getDebugSettings().jammerProbability then
-						iads:printOutput("JAMMER: Distance: "..distance)
+			-- Filter unsupported/disabled sites before allocating radar lists.
+			if self:isKnownRadarEmitter(natoName) then
+				local radars = samSite:getRadars()
+				for l = 1, #radars do
+					local radar = radars[l]
+					local distance = self:getDistanceNMToRadarUnit(radar)
+					-- Terrain LOS is needed only inside the effective range.
+					if distance <= self.maximumEffectiveDistanceNM and self:hasLineOfSightToRadar(radar) then
+						if iads:getDebugSettings().jammerProbability then
+							iads:printOutput("JAMMER: Distance: "..distance)
+						end
+						-- Keep one attempt per eligible radar and the original RNG order.
+						samSite:jam(self:getSuccessProbability(distance, natoName))
 					end
-					samSite:jam(self:getSuccessProbability(distance, natoName))
 				end
 			end
 		end
