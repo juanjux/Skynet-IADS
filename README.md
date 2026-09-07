@@ -45,6 +45,18 @@ way:
 
 ### Performance and correctness (2026-09-07)
 
+- **Dispatch world events to affected IADS elements.** One world handler per IADS routes
+  SHOT/DEAD events through engine-object subscriptions instead of asking every element
+  to inspect every event. Shared power/connection nodes, group members and later births
+  are indexed; cleanup removes subscriptions and activation restores them. Legacy direct
+  onEvent calls and synthetic DEAD events without an initiator remain supported.
+  The 100-element test registers one world handler instead of 101. Tests cover unrelated
+  shots, shared dependencies, object-wrapper identity, groups/births, reassignment,
+  independent networks, cleanup during dispatch and deactivate/reactivate. This is the
+  broadest behavioral refactor and needs DCS testing of real DEAD/BIRTH events and
+  respawn scripts.
+  Verified with the offline Lua 5.1 harness (DCS/MIST doubles, not an FPS benchmark).
+
 - **The contact filter runs once per contact, not once per site-and-contact pair.**
   `SkynetIADS.evaluateContacts` called `contact:getDesc()` inside its double loop, so a
   map with 20 sites to trigger and 100 contacts made 2000 calls every cycle for an answer

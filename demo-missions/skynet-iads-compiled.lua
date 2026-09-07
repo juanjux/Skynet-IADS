@@ -1,4 +1,4 @@
-env.info("--- SKYNET VERSION: 3.3.0-juanjux-fork | BUILD TIME: 07.09.2026 1550Z ---")
+env.info("--- SKYNET VERSION: 3.3.0-juanjux-event-dispatch | BUILD TIME: 07.09.2026 1636Z ---")
 do
 --this file contains the required units per sam type
 samTypesDB = {	
@@ -1412,14 +1412,99 @@ function SkynetIADS:create(name)
 		iads.name = ""
 	end
 	iads.contactUpdateInterval = 5
+	iads.eventElements = {}
+	iads.eventObjectSubscribers = {}
+	iads.eventGroupSubscribers = {}
+	iads.eventHandlerRegistered = true
 	world.addEventHandler(iads)
 	return iads
 end
 
+-- DCS may hand out a new Lua wrapper for the same engine object.
+-- id_ also remains readable when an event's initiator has already died.
+local function eventObjectKey(object)
+	return object and (object.id_ or object)
+end
+
+function SkynetIADS:registerEventObject(element, object)
+	if not object then return end
+	local key = eventObjectKey(object)
+	local subscribers = self.eventObjectSubscribers[key]
+	if not subscribers then
+		subscribers = {}
+		self.eventObjectSubscribers[key] = subscribers
+	end
+	subscribers[element] = true
+	self.eventElements[element][key] = true
+	-- A group itself does not fire weapons: subscribe to all current members.
+	if getmetatable(object) == Group and object:isExist() then
+		local name = object:getName()
+		self.eventGroupSubscribers[name] = self.eventGroupSubscribers[name] or {}
+		self.eventGroupSubscribers[name][element] = true
+		local units = object:getUnits() or {}
+		for i = 1, #units do
+			self:registerEventObject(element, units[i])
+		end
+	end
+end
+
+function SkynetIADS:registerElementEvents(element)
+	self:unregisterElementEvents(element)
+	self.eventElements[element] = {}
+	self:registerEventObject(element, element:getDCSRepresentation())
+	for _, object in ipairs(element:getPowerSources()) do
+		self:registerEventObject(element, object)
+	end
+	for _, object in ipairs(element:getConnectionNodes()) do
+		self:registerEventObject(element, object)
+	end
+	if not self.eventHandlerRegistered then
+		world.addEventHandler(self)
+		self.eventHandlerRegistered = true
+	end
+end
+
+function SkynetIADS:unregisterElementEvents(element)
+	local keys = self.eventElements[element]
+	if keys then
+		for key in pairs(keys) do
+			local subscribers = self.eventObjectSubscribers[key]
+			subscribers[element] = nil
+			if next(subscribers) == nil then
+				self.eventObjectSubscribers[key] = nil
+			end
+		end
+		self.eventElements[element] = nil
+		for name, subscribers in pairs(self.eventGroupSubscribers) do
+			subscribers[element] = nil
+			if next(subscribers) == nil then self.eventGroupSubscribers[name] = nil end
+		end
+	end
+end
+
 function SkynetIADS:onEvent(event)
-	if (event.id == world.event.S_EVENT_BIRTH ) then
-		env.info("New Object Spawned")
-	--	self:addSAMSite(event.initiator:getGroup():getName());
+	if event.id == world.event.S_EVENT_BIRTH then
+		local unit = event.initiator
+		if unit and unit.getGroup then
+			local group = unit:getGroup()
+			local subscribers = group and self.eventGroupSubscribers[group:getName()]
+			if subscribers then
+				for element in pairs(subscribers) do self:registerEventObject(element, unit) end
+			end
+		end
+		return
+	end
+	if event.id ~= world.event.S_EVENT_SHOT and event.id ~= world.event.S_EVENT_DEAD then return end
+	local subscribers = self.eventObjectSubscribers[eventObjectKey(event.initiator)]
+	-- Retain legacy synthetic DEAD events without an initiator.
+	if event.id == world.event.S_EVENT_DEAD and not event.initiator then subscribers = self.eventElements end
+	if not subscribers then return end
+	-- Callbacks may clean up elements; don't iterate a table they can mutate.
+	local pending = {}
+	for element in pairs(subscribers) do pending[#pending + 1] = element end
+	for i = 1, #pending do
+		local element = pending[i]
+		if self.eventElements[element] then element:onEvent(event) end
 	end
 end
 
@@ -1959,6 +2044,13 @@ end
 
 -- will start going through the Early Warning Radars and SAM sites to check what targets they have detected
 function SkynetIADS.activate(self)
+	-- cleanUp removes subscriptions; activation must restore them.
+	for _, element in ipairs(self:getAbstracRadarElements()) do self:registerElementEvents(element) end
+	for _, element in ipairs(self.commandCenters) do self:registerElementEvents(element) end
+	if not self.eventHandlerRegistered then
+		world.addEventHandler(self)
+		self.eventHandlerRegistered = true
+	end
 	mist.removeFunction(self.ewRadarScanMistTaskID)
 	self.ewRadarScanMistTaskID = mist.scheduleFunction(SkynetIADS.evaluateContacts, {self}, 1, self.contactUpdateInterval)
 	self:buildRadarCoverage()
@@ -1970,6 +2062,8 @@ function SkynetIADS:setupSAMSitesAndThenActivate(setupTime)
 end
 
 function SkynetIADS:deactivate()
+	world.removeEventHandler(self)
+	self.eventHandlerRegistered = false
 	mist.removeFunction(self.ewRadarScanMistTaskID)
 	mist.removeFunction(self.samSetupMistTaskID)
 	self:deativateSAMSites()
@@ -2277,12 +2371,19 @@ function SkynetIADSAbstractElement:create(dcsRepresentation, iads)
 	instance.powerSources = {}
 	instance.iads = iads
 	instance.natoName = "UNKNOWN"
-	world.addEventHandler(instance)
+	iads:registerElementEvents(instance)
 	return instance
 end
 
 function SkynetIADSAbstractElement:removeEventHandlers()
-	world.removeEventHandler(self)
+	self.iads:unregisterElementEvents(self)
+end
+
+function SkynetIADSAbstractElement:setDCSRepresentation(representation)
+	SkynetIADSAbstractDCSObjectWrapper.setDCSRepresentation(self, representation)
+	if self.iads and self.iads.eventElements[self] then
+		self.iads:registerElementEvents(self)
+	end
 end
 
 function SkynetIADSAbstractElement:cleanUp()
@@ -2295,6 +2396,7 @@ end
 
 function SkynetIADSAbstractElement:addPowerSource(powerSource)
 	table.insert(self.powerSources, powerSource)
+	if self.iads.eventElements[self] then self.iads:registerEventObject(self, powerSource) end
 	self:informChildrenOfStateChange()
 	return self
 end
@@ -2305,6 +2407,7 @@ end
 
 function SkynetIADSAbstractElement:addConnectionNode(connectionNode)
 	table.insert(self.connectionNodes, connectionNode)
+	if self.iads.eventElements[self] then self.iads:registerEventObject(self, connectionNode) end
 	self:informChildrenOfStateChange()
 	return self
 end
