@@ -9,6 +9,13 @@ from lupa.lua51 import LuaRuntime
 ROOT = Path(__file__).resolve().parents[2]
 HERE = Path(__file__).resolve().parent
 
+def compile_source_files():
+    lua = LuaRuntime()
+    paths = sorted((ROOT / "skynet-iads-source").rglob("*.lua"))
+    for path in paths:
+        lua.compile(path.read_text(encoding="utf-8-sig"), name="@" + str(path))
+    print(f"PASS: {len(paths)} standalone Lua source files", flush=True)
+
 def source_bundle():
     build = (ROOT / "build-tools/build-compiled-script.ps1").read_text(encoding="utf-8-sig")
     paths = re.findall(r"\.\./(skynet-iads-source/[^,\s]+\.lua)", build)
@@ -21,7 +28,7 @@ def run(target, pattern):
     scenarios = sorted((HERE / "scenarios").glob(pattern))
     if not scenarios:
         raise RuntimeError("No matching scenarios")
-    # Sources deliberately have do/end scopes spanning file boundaries.
+    # Validate the assembled artifact as well as the standalone sources.
     LuaRuntime().compile(code, name="@" + target)
     for scenario in scenarios:
         lua = LuaRuntime(unpack_returned_tuples=True)
@@ -36,6 +43,7 @@ def main():
     parser.add_argument("--target", choices=("sources", "compiled", "both"), default="both")
     parser.add_argument("--scenario", default="*.lua")
     args = parser.parse_args()
+    compile_source_files()
     targets = ("sources", "compiled") if args.target == "both" else (args.target,)
     count = sum(run(target, args.scenario) for target in targets)
     print(f"PASS: {count} scenario runs (Lua 5.1)")
@@ -43,4 +51,3 @@ def main():
 
 if __name__ == "__main__":
     sys.exit(main())
-
