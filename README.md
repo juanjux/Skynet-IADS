@@ -79,6 +79,29 @@ way:
 - **[#46](https://github.com/walder/Skynet-IADS/issues/46) — mobile SAMs should move
   when a HARM is detected.** That is `ActMobile`, also brought in above.
 
+### Upstream pull requests adopted
+
+Upstream is not merging anything, so the good ones are taken here, with credit.
+
+- **[#105](https://github.com/walder/Skynet-IADS/pull/105) by MacFlorent** — calling
+  `getCategory` as a method raises on an object that exists but is destroyed, and the
+  error takes down whatever asked for the contact's type name. `Object.getCategory`
+  answers nil instead.
+- **[#106](https://github.com/walder/Skynet-IADS/pull/106) by MacFlorent** — the Phalanx
+  can engage HARMs in DCS, whatever the realism of it, and the database said it could
+  not. (It also fixes a missing comma.)
+
+### Considered and not taken
+
+- **[#75](https://github.com/walder/Skynet-IADS/pull/75) by MacFlorent** — the HARM
+  identification aliasing bug, where the evaluated-radars list was the same table as the
+  detected one, so only the first radar ever tried. Already fixed upstream in 3.3.0 by a
+  different route: `getNewRadarsThatHaveDetectedContact` builds its own table now.
+- **[#77](https://github.com/walder/Skynet-IADS/issues/77)** — user-definable range for
+  connection nodes. Juanjo's call: campaigns place their comms towers without any such
+  range in mind, so introducing one would change what is connected in campaigns already
+  being played.
+
 ### Build
 
 - `build-tools/build-compiled-script.ps1` no longer overwrites this README. It used to

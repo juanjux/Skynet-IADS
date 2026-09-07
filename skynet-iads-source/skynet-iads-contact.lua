@@ -72,7 +72,11 @@ function SkynetIADSContact:getTypeName()
 		return SkynetIADSContact.HARM
 	end
 	if self:getDCSRepresentation() ~= nil then
-		local category = self:getDCSRepresentation():getCategory()
+		-- Called as a method, getCategory raises on an object that exists but is
+		-- destroyed, and the error takes down whatever asked for the type name. Called
+		-- as Object.getCategory it answers nil instead. Upstream PR walder/Skynet-IADS#105
+		-- by MacFlorent, still open.
+		local category = Object.getCategory(self:getDCSRepresentation())
 		if category == Object.Category.UNIT then
 			return self.typeName
 		end

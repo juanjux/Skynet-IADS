@@ -416,7 +416,10 @@ samTypesDB = {
 		['name'] = {
 			['NATO'] = 'Phalanx',
 		},
-		['harm_detection_chance'] = 10
+		['harm_detection_chance'] = 10,
+		-- In DCS it can, whatever the realism of it. Upstream PR walder/Skynet-IADS#106
+		-- by MacFlorent, still open.
+		['can_engage_harm'] = true
 	},	
 -- Start of RED EW radars:	
 	['1L13 EWR'] = {

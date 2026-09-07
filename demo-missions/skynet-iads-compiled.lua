@@ -1,4 +1,4 @@
-env.info("--- SKYNET VERSION: 3.3.0-juanjux-fork | BUILD TIME: 07.09.2026 1530Z ---")
+env.info("--- SKYNET VERSION: 3.3.0-juanjux-fork | BUILD TIME: 07.09.2026 1539Z ---")
 do
 --this file contains the required units per sam type
 samTypesDB = {	
@@ -417,7 +417,10 @@ samTypesDB = {
 		['name'] = {
 			['NATO'] = 'Phalanx',
 		},
-		['harm_detection_chance'] = 10
+		['harm_detection_chance'] = 10,
+		-- In DCS it can, whatever the realism of it. Upstream PR walder/Skynet-IADS#106
+		-- by MacFlorent, still open.
+		['can_engage_harm'] = true
 	},	
 -- Start of RED EW radars:	
 	['1L13 EWR'] = {
@@ -3433,7 +3436,11 @@ function SkynetIADSContact:getTypeName()
 		return SkynetIADSContact.HARM
 	end
 	if self:getDCSRepresentation() ~= nil then
-		local category = self:getDCSRepresentation():getCategory()
+		-- Called as a method, getCategory raises on an object that exists but is
+		-- destroyed, and the error takes down whatever asked for the type name. Called
+		-- as Object.getCategory it answers nil instead. Upstream PR walder/Skynet-IADS#105
+		-- by MacFlorent, still open.
+		local category = Object.getCategory(self:getDCSRepresentation())
 		if category == Object.Category.UNIT then
 			return self.typeName
 		end
