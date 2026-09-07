@@ -15,7 +15,10 @@ function SkynetIADSContact:create(dcsRadarTarget, abstractRadarElementDetected)
 	setmetatable(instance, self)
 	self.__index = self
 	instance.abstractRadarElementsDetected = {}
-	table.insert(instance.abstractRadarElementsDetected, abstractRadarElementDetected)
+	instance.abstractRadarElementsDetectedSet = {}
+	if abstractRadarElementDetected ~= nil then
+		instance:addAbstractRadarElementDetected(abstractRadarElementDetected)
+	end
 	instance.firstContactTime = timer.getAbsTime()
 	instance.lastTimeSeen = 0
 	instance.dcsRadarTarget = dcsRadarTarget
@@ -56,7 +59,10 @@ function SkynetIADSContact:getAbstractRadarElementsDetected()
 end
 
 function SkynetIADSContact:addAbstractRadarElementDetected(radar)
-	self:insertToTableIfNotAlreadyAdded(self.abstractRadarElementsDetected, radar)
+	if radar ~= nil and not self.abstractRadarElementsDetectedSet[radar] then
+		self.abstractRadarElementsDetectedSet[radar] = true
+		table.insert(self.abstractRadarElementsDetected, radar)
+	end
 end
 
 function SkynetIADSContact:isTypeKnown()
