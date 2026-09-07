@@ -62,6 +62,7 @@ function SkynetIADSAbstractRadarElement:weaponFired(event)
 		for i = 1, #self.launchers do
 			local launcher = self.launchers[i]
 			if launcher:getDCSRepresentation() == launcherFired then
+				launcher:invalidateAmmoSnapshot()
 				table.insert(self.missilesInFlight, weapon)
 			end
 		end
