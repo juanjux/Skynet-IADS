@@ -1,4 +1,4 @@
-env.info("--- SKYNET VERSION: 3.3.0-juanjux-fork | BUILD TIME: 07.09.2026 1539Z ---")
+env.info("--- SKYNET VERSION: 3.3.0-juanjux-fork | BUILD TIME: 07.09.2026 1550Z ---")
 do
 --this file contains the required units per sam type
 samTypesDB = {	
@@ -523,6 +523,18 @@ samTypesDB['S-300PMU1'] = {
 				['NATO'] = '',
 			},
 		},
+		-- HDS 2.0 lets the SA-20A/B use the Tin Shield, both the SA-5's and the mast
+		-- mounted 40B6M that came with the DCS 2.9 S-300. Upstream walder/Skynet-IADS#94.
+		['S-300PS 40B6MD sr_19J6'] = {
+			['name'] = {
+				['NATO'] = 'Tin Shield',
+			},
+		},
+		['RLS_19J6'] = {
+			['name'] = {
+				['NATO'] = 'Tin Shield',
+			},
+		},
 	},
 	['trackingRadar'] = {
 		['S-300PMU1 40B6M tr'] = {
@@ -809,6 +821,18 @@ samTypesDB['S-300PMU2'] = {
 		['S-300PS 64H6E sr'] = {
 			['name'] = {
 				['NATO'] = '',
+			},
+		},
+		-- HDS 2.0 lets the SA-20A/B use the Tin Shield, both the SA-5's and the mast
+		-- mounted 40B6M that came with the DCS 2.9 S-300. Upstream walder/Skynet-IADS#94.
+		['S-300PS 40B6MD sr_19J6'] = {
+			['name'] = {
+				['NATO'] = 'Tin Shield',
+			},
+		},
+		['RLS_19J6'] = {
+			['name'] = {
+				['NATO'] = 'Tin Shield',
 			},
 		},
 	},
