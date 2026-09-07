@@ -45,6 +45,16 @@ way:
 
 ### Performance and correctness (2026-09-07)
 
+- **Reuse position samples within contact evaluations.** A refresh samples DCS position
+  once for speed, altitude profile and stored position; a newly detected contact reuses
+  its construction sample. goDark polls detected targets only once per decision,
+  including the no-cache startup window.
+  Tests cover motion, altitude history, death, same-instant refresh, startup freshness,
+  steady cache reuse and power/HARM shutdown. For 20 startup contacts, goDark uses one
+  detection query and 20 position reads instead of two queries and 160 reads. Contact
+  objects are not pooled across sites/cycles, and the existing cache TTL is unchanged.
+  Verified with the offline Lua 5.1 harness (DCS/MIST doubles, not an FPS benchmark).
+
 - **The contact filter runs once per contact, not once per site-and-contact pair.**
   `SkynetIADS.evaluateContacts` called `contact:getDesc()` inside its double loop, so a
   map with 20 sites to trigger and 100 contacts made 2000 calls every cycle for an answer

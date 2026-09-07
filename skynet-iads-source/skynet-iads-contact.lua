@@ -115,23 +115,24 @@ function SkynetIADSContact:getNumberOfTimesHitByRadar()
 	return self.numOfTimesRefreshed
 end
 
-function SkynetIADSContact:refresh()
+function SkynetIADSContact:refresh(currentPosition)
 	if self:isExist() then
 		local timeDelta = (timer.getAbsTime() - self.lastTimeSeen)
 		if timeDelta > 0 then
+			currentPosition = currentPosition or self:getDCSRepresentation():getPosition()
 			self.numOfTimesRefreshed = self.numOfTimesRefreshed + 1
-			local distance = mist.utils.metersToNM(mist.utils.get2DDist(self.position.p, self:getDCSRepresentation():getPosition().p))
+			local distance = mist.utils.metersToNM(mist.utils.get2DDist(self.position.p, currentPosition.p))
 			local hours = timeDelta / 3600
 			self.speed = (distance / hours)
-			self:updateSimpleAltitudeProfile()
-			self.position = self:getDCSRepresentation():getPosition()
+			self:updateSimpleAltitudeProfile(currentPosition)
+			self.position = currentPosition
 		end 
 	end
 	self.lastTimeSeen = timer.getAbsTime()
 end
 
-function SkynetIADSContact:updateSimpleAltitudeProfile()
-	local currentAltitude = self:getDCSRepresentation():getPosition().p.y
+function SkynetIADSContact:updateSimpleAltitudeProfile(currentPosition)
+	local currentAltitude = (currentPosition or self:getDCSRepresentation():getPosition()).p.y
 	
 	local previousPath = ""
 	if #self.simpleAltitudeProfile > 0 then

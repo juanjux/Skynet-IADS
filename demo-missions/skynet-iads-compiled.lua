@@ -1,4 +1,4 @@
-env.info("--- SKYNET VERSION: 3.3.0-juanjux-fork | BUILD TIME: 07.09.2026 1550Z ---")
+env.info("--- SKYNET VERSION: 3.3.0-juanjux-contact-snapshots | BUILD TIME: 07.09.2026 1634Z ---")
 do
 --this file contains the required units per sam type
 samTypesDB = {	
@@ -2959,9 +2959,20 @@ end
 
 
 function SkynetIADSAbstractRadarElement:goDark()
-	if (self:hasWorkingPowerSource() == false) or ( self.aiState == true ) 
-	and (self.harmSilenceID ~= nil or ( self.harmSilenceID == nil and #self:getDetectedTargets() == 0 and self:hasMissilesInFlight() == false) or ( self.harmSilenceID == nil and #self:getDetectedTargets() > 0 and self:hasMissilesInFlight() == false and self:hasRemainingAmmo() == false ) )	
-	then
+	local shouldGoDark = not self:hasWorkingPowerSource()
+	if not shouldGoDark and self.aiState == true then
+		if self.harmSilenceID ~= nil then
+			shouldGoDark = true
+		else
+			-- During the no-cache startup window a second call would poll DCS
+			-- and allocate all contacts again in this same decision.
+			local targets = self:getDetectedTargets()
+			if not self:hasMissilesInFlight() then
+				shouldGoDark = #targets == 0 or not self:hasRemainingAmmo()
+			end
+		end
+	end
+	if shouldGoDark then
 		if self:isDestroyed() == false then
 			self:getDCSRepresentation():enableEmission(false)
 		end
@@ -3177,7 +3188,8 @@ function SkynetIADSAbstractRadarElement:getDetectedTargets()
 				-- there are cases when a destroyed object is still visible as a target to the radar, don't add it, will cause errors everywhere the dcs object is accessed
 				if target.object then
 					local iadsTarget = SkynetIADSContact:create(target, self)
-					iadsTarget:refresh()
+					-- Creation already sampled this detection's position.
+					iadsTarget:refresh(iadsTarget:getPosition())
 					if self:isTargetInRange(iadsTarget) then
 						table.insert(self.cachedTargets, iadsTarget)
 					end
@@ -3503,23 +3515,24 @@ function SkynetIADSContact:getNumberOfTimesHitByRadar()
 	return self.numOfTimesRefreshed
 end
 
-function SkynetIADSContact:refresh()
+function SkynetIADSContact:refresh(currentPosition)
 	if self:isExist() then
 		local timeDelta = (timer.getAbsTime() - self.lastTimeSeen)
 		if timeDelta > 0 then
+			currentPosition = currentPosition or self:getDCSRepresentation():getPosition()
 			self.numOfTimesRefreshed = self.numOfTimesRefreshed + 1
-			local distance = mist.utils.metersToNM(mist.utils.get2DDist(self.position.p, self:getDCSRepresentation():getPosition().p))
+			local distance = mist.utils.metersToNM(mist.utils.get2DDist(self.position.p, currentPosition.p))
 			local hours = timeDelta / 3600
 			self.speed = (distance / hours)
-			self:updateSimpleAltitudeProfile()
-			self.position = self:getDCSRepresentation():getPosition()
+			self:updateSimpleAltitudeProfile(currentPosition)
+			self.position = currentPosition
 		end 
 	end
 	self.lastTimeSeen = timer.getAbsTime()
 end
 
-function SkynetIADSContact:updateSimpleAltitudeProfile()
-	local currentAltitude = self:getDCSRepresentation():getPosition().p.y
+function SkynetIADSContact:updateSimpleAltitudeProfile(currentPosition)
+	local currentAltitude = (currentPosition or self:getDCSRepresentation():getPosition()).p.y
 	
 	local previousPath = ""
 	if #self.simpleAltitudeProfile > 0 then

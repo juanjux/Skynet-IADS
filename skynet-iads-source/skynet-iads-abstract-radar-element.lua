@@ -560,9 +560,20 @@ end
 
 
 function SkynetIADSAbstractRadarElement:goDark()
-	if (self:hasWorkingPowerSource() == false) or ( self.aiState == true ) 
-	and (self.harmSilenceID ~= nil or ( self.harmSilenceID == nil and #self:getDetectedTargets() == 0 and self:hasMissilesInFlight() == false) or ( self.harmSilenceID == nil and #self:getDetectedTargets() > 0 and self:hasMissilesInFlight() == false and self:hasRemainingAmmo() == false ) )	
-	then
+	local shouldGoDark = not self:hasWorkingPowerSource()
+	if not shouldGoDark and self.aiState == true then
+		if self.harmSilenceID ~= nil then
+			shouldGoDark = true
+		else
+			-- During the no-cache startup window a second call would poll DCS
+			-- and allocate all contacts again in this same decision.
+			local targets = self:getDetectedTargets()
+			if not self:hasMissilesInFlight() then
+				shouldGoDark = #targets == 0 or not self:hasRemainingAmmo()
+			end
+		end
+	end
+	if shouldGoDark then
 		if self:isDestroyed() == false then
 			self:getDCSRepresentation():enableEmission(false)
 		end
@@ -778,7 +789,8 @@ function SkynetIADSAbstractRadarElement:getDetectedTargets()
 				-- there are cases when a destroyed object is still visible as a target to the radar, don't add it, will cause errors everywhere the dcs object is accessed
 				if target.object then
 					local iadsTarget = SkynetIADSContact:create(target, self)
-					iadsTarget:refresh()
+					-- Creation already sampled this detection's position.
+					iadsTarget:refresh(iadsTarget:getPosition())
 					if self:isTargetInRange(iadsTarget) then
 						table.insert(self.cachedTargets, iadsTarget)
 					end
